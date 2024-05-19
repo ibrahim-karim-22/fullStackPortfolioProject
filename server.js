@@ -4,7 +4,7 @@ const userRouter = require('./routes/users');
 const locationRouter = require('./routes/locations');
 const communicationRouter = require('./routes/communication');
 
-hostname = 'localhost';
+const hostname = 'localhost';
 const port = 3000;
 
 const app = express();

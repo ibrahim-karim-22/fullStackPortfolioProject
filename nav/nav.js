@@ -15,12 +15,12 @@ const Stack = createStackNavigator();
 const CustomDrawerContent = props => (
   <DrawerContentScrollView {...props} style={styles.sideDrawer}>
     <View style={styles.drawerSideLogo}>
-      <View style={{flex: 1}}>
+      {/* <View style={{flex: 1}}>
         <Image
           source={require('../assets/splash.png')}
           style={styles.drawerImage}
         />
-      </View>
+      </View> */}
       <View style={{flex: 1}}>
         <Text style={styles.drawerLogoText}>BARD</Text>
       </View>

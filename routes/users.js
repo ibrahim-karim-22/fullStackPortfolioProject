@@ -1,41 +1,51 @@
 const express = require('express');
+const { User } = require('../models/Schema');
 const userRouter = express.Router();
 
 userRouter
   .route('/')
-  .all((req, res, next) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    next();
+  .get((req, res, next) => {
+    User.find()
+      .then(users => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        res.json(users);
+      })
+      .catch(err => next(err));
   })
 
-  .get((req, res) => {
-    res.end('here is the list for all the users');
-  })
-
-  .post((req, res) => {
-    res.end('user created successfully');
+  .post((req, res, next) => {
+    User.create(req.body)
+      .then(user => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(user);
+      })
+      .catch(err => next(err));
   });
 
 userRouter
   .route('/:userId')
-  .all((req, res, next) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    next();
+  .get((req, res, next) => {
+    User.findById(req.params.userId)
+      .then(user => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        res.json(user);
+      })
+      .catch(err => next(err));
   })
 
-  .get((req, res) => {
-    res.end('here is the user info');
-  })
-
-  .put((req, res) => {
-    res.write("updating...")
-    res.end("updated user's details");
-  })
-
-  .delete((req, res) => {
-    res.end('user has been deleted');
+  .delete((req, res, next) => {
+    User.findByIdAndDelete(req.params.userId)
+      .then(response => {
+        res.stautsCode = 200;
+        res.setHeader('Content-Type', 'applicaion/json');
+        res.json(response);
+      })
+      .catch(err => next(err));
   });
+
+  
 
   module.exports = userRouter;

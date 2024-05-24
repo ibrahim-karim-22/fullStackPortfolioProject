@@ -15,14 +15,14 @@ userRouter
   })
 
   .post((req, res, next) => {
-    User.create(req.body)
+    User.create(req.body) 
       .then(user => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(user);
       })
       .catch(err => next(err));
-  });
+  })
 
 userRouter
   .route('/:userId')
@@ -39,13 +39,13 @@ userRouter
   .delete((req, res, next) => {
     User.findByIdAndDelete(req.params.userId)
       .then(response => {
-        res.stautsCode = 200;
-        res.setHeader('Content-Type', 'applicaion/json');
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
         res.json(response);
       })
       .catch(err => next(err));
   });
 
-  
+
 
   module.exports = userRouter;

@@ -5,8 +5,9 @@ import {
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {useEffect, useState} from 'react';
-import {SafeAreaView} from 'react-native';
+import {SafeAreaView, StyleSheet, View, Text} from 'react-native';
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faHouseFlag } from '@fortawesome/free-solid-svg-icons';
 import HomeScreen from '../screens/HomeScreen';
 
 const Drawer = createDrawerNavigator();

@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const User = require('../models/userSchema');
 const userRouter = express.Router();
 
@@ -10,11 +11,26 @@ userRouter
       .catch(err => next(err));
   })
 
-  .post((req, res, next) => {
-    User.create(req.body) 
-      .then(user => res.status(200).json(user))
-      .catch(err => next(err));
-  })
+userRouter
+.route('/signup')
+.post(async (req, res, next) => {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword
+    });
+    const savedUser = await newUser.save();
+    res.status(201).json(savedUser);
+  } catch (error) {
+    next(error);
+  } 
+});
+  
+  
 
 userRouter
   .route('/:userId')

@@ -1,51 +1,50 @@
 const express = require('express');
-const morgan = require('morgan');
 const mongoose = require('mongoose');
 const createError = require('http-errors');
 const path = require('path')
 const logger = require('morgan');
-const cookieParser = require('cookie-parser')
 
+const passport = require('passport');
+const config = require('./config');
+
+const welcomeRouter = require('./routes/welcome');
 const userRouter = require('./routes/users');
 const locationRouter = require('./routes/locations');
 const communicationRouter = require('./routes/communication');
 
-const hostname = 'localhost';
-const port = 3000;
-
-const app = express();
-
-app.use(morgan('dev'));
-app.use(express.json());
-
-app.use(express.static(__dirname + '/public'));
-
-const url = 'mongodb+srv://ib2ra2heem:iIgcgNvNscGlbEeE@locationapp.zdepmos.mongodb.net/?retryWrites=true&w=majority&appName=LocationApp';
+const url = config.MONGO_KEY;
 mongoose.connect(url, { useNewUrlParser: true, })
   .then(() => console.log('Connected to server'))
   .catch(err => console.log(err));
+
+
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-
-//middleware setup
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: false }));
 
-//Routes
-app.use('/users', userRouter);
-app.use('/locations', locationRouter);
-app.use('/communication', communicationRouter);
+app.use(passport.initialize());
 
-// catch 404 and forward to error handler
+app.use("/", welcomeRouter);
+app.use("/users", userRouter);
+
+app.use(express.static(path.join(__dirname + '/public')));
+
+app.use("/locations", locationRouter);
+app.use("/communication", communicationRouter);
+
 app.use((req, res, next) => {
   next(createError(404));
 });
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // error handler
 app.use((err, req, res, next) => {
@@ -61,3 +60,5 @@ app.use((err, req, res, next) => {
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`)
 })
+
+module.exports = app;

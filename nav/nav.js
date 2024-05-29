@@ -9,6 +9,8 @@ import {SafeAreaView, StyleSheet, View, Text} from 'react-native';
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHouseFlag } from '@fortawesome/free-solid-svg-icons';
 import HomeScreen from '../screens/HomeScreen';
+import SignUpScreen from '../screens/SignUpScreen';
+import LoginScreen from '../screens/LoginScreen';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -23,7 +25,7 @@ const CustomDrawerContent = props => (
         />
       </View> */}
       <View style={{flex: 1}}>
-        <Text style={styles.drawerLogoText}>BARD</Text>
+        <Text style={styles.drawerLogoText}>Location</Text>
       </View>
     </View>
     <DrawerItemList {...props} labelStyle={{fontWeight: 'bold'}} />
@@ -42,6 +44,38 @@ const Main = () => {
         <Drawer.Screen
           name="Home"
           component={HomeScreen}
+          options={{
+            headerShown: true,
+            drawerLabelStyle: {color: 'white'},
+            drawerIcon: ({focused}) => (
+              <FontAwesomeIcon
+                icon={faHouseFlag}
+                style={styles.drawerIcon}
+                size={28}
+                color={focused ? 'peru' : 'gray'}
+              />
+            ),
+          }}
+        />
+          <Drawer.Screen
+          name="Signup"
+          component={SignUpScreen}
+          options={{
+            headerShown: true,
+            drawerLabelStyle: {color: 'white'},
+            drawerIcon: ({focused}) => (
+              <FontAwesomeIcon
+                icon={faHouseFlag}
+                style={styles.drawerIcon}
+                size={28}
+                color={focused ? 'peru' : 'gray'}
+              />
+            ),
+          }}
+        />
+            <Drawer.Screen
+          name="Login"
+          component={LoginScreen}
           options={{
             headerShown: true,
             drawerLabelStyle: {color: 'white'},
@@ -100,7 +134,6 @@ const Stacks = () => {
       color: "rgba(255, 250, 250, .7)",
       fontSize: 55,
       fontWeight: "bold",
-      marginLeft: -70,
       textShadowColor: "rgba(255, 255, 255, .4)",
       textShadowOffset: { width: 0.2, height: 0.2 },
       textShadowRadius: 33,

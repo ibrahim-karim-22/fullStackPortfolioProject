@@ -12,12 +12,12 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 exports.getToken = function(user) {
-    return jwt.sign(user, config.secretKey, {expiresIn: 3600});
+    return jwt.sign(user, config.SECRET_KEY, {expiresIn: 3600});
 };
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = config.MONGO_KEY;
+opts.secretOrKey = config.SECRET_KEY;
 
 exports.jwtPassport = passport.use(new jwtStrategy(opts, (jwt_payload, done) => {
     console.log("JWT payload: ", jwt_payload);

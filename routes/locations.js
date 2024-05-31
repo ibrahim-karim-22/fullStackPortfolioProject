@@ -1,6 +1,7 @@
 const express = require('express');
 const locationRouter = express.Router();
 const Location = require('../models/locationSchema')
+const authenticate = require('../authenticate');
 
 locationRouter
   .route('/')
@@ -9,7 +10,7 @@ locationRouter
       .then(locations => res.status(200).json(locations))
       .catch(err => next(err));
   })
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     Location.create(req.body)
       .then(location => res.status(200).json(location))
       .catch(err => next(err));
@@ -23,9 +24,9 @@ locationRouter
       .catch(err => next(err));
   })
 
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Location.deleteMany({ userId: req.params.userId })
-      .then(location => res.status(200).json(location))
+      .then(result => res.status(200).json(result))
       .catch(err => next(err));
   });
 

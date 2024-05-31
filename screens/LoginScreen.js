@@ -1,4 +1,4 @@
-const config = require("./config");
+const config = require("../config");
 const AsyncStorage = require("@react-native-async-storage/async-storage");
 import {
     View,
@@ -24,7 +24,7 @@ import { Card } from "react-native-elements";
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${config.MONGO_KEY}/login`, {
+            const response = await fetch(`${config.CLOUD_KEY}/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -32,7 +32,7 @@ import { Card } from "react-native-elements";
                 body: JSON.stringify({ email, password }),
                 
             });
-
+            console.log("Response data:", response); 
             const data = await response.json();
 
             if (response.ok) {

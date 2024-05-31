@@ -10,6 +10,7 @@ import {
 import { Card } from 'react-native-elements';
 import {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+const config = require('../config');
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -22,7 +23,7 @@ const SignUpScreen = () => {
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${config.MONGO_KEY}/signup`, {
+      const response = await fetch(`https://${config.CLOUD_KEY}/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +85,8 @@ const SignUpScreen = () => {
           ) : (
             <>
               <View style={styles.btn}>
-                <Button title="SignUp" color={'rgba(130, 0, 0, .7)'} />
+                <Button title="SignUp" color={'rgba(130, 0, 0, .7)'} onPress={handleSignUp} />
+
               </View>
             </>
           )}

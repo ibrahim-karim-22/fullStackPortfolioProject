@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
+  Alert
 } from 'react-native';
 import { Card } from 'react-native-elements';
 import {useState} from 'react';
@@ -14,8 +15,9 @@ const config = require('../config');
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,12 +25,12 @@ const SignUpScreen = () => {
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`https://${config.CLOUD_KEY}/users/signup`, {
+      const response = await fetch(config.CLOUD_KEY + `/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({firstName, lastName, email, password}),
+        body: JSON.stringify({firstname, lastname, username, email, password}),
       });
       const data = await response.json();
 
@@ -56,14 +58,20 @@ const SignUpScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="First Name"
-            value={firstName}
-            onChangeText={setFirstName}
+            value={firstname}
+            onChangeText={setFirstname}
           />
           <TextInput
             style={styles.input}
             placeholder="Last Name"
-            value={lastName}
-            onChangeText={setLastName}
+            value={lastname}
+            onChangeText={setLastname}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="username"
+            value={username}
+            onChangeText={setUsername}
           />
           <TextInput
             style={styles.input}

@@ -1,5 +1,5 @@
 const config = require("../config");
-const AsyncStorage = require("@react-native-async-storage/async-storage");
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     View,
     Text,
@@ -8,15 +8,16 @@ import {
     StyleSheet,
     ActivityIndicator,
     KeyboardAvoidingView,
+    Alert
   } from "react-native";
   import { useEffect, useState } from "react";
   import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { Card } from "react-native-elements";
-  import { Alert } from "react-native";
+
   // import * as SecureStore from "expo-secure-store";
 
   const LoginScreen = ({ navigation }) => {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -24,23 +25,27 @@ import { Card } from "react-native-elements";
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${config.CLOUD_KEY}/users/login`, {
+            const response = await fetch(config.CLOUD_KEY + `/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ username, password }),
                 
             });
+            console.log("Response status:", response.status);
             console.log("Response data:", response); 
             const data = await response.json();
 
             if (response.ok) {
+              
                 await AsyncStorage.setItem("authToken", data.token);
                 Alert.alert("Login Successful", "Welcome back!");
                 navigation.navigate("Home");
             } else {
-                Alert.alert("Error", data.message || "An error occured while logging in.");
+              const errorData = await response.text();
+              // const data = JSON.parse(errorData);
+                Alert.alert("Error", errorData || "An error occured while logging in.");
             } 
 
         } catch (error) {
@@ -56,10 +61,10 @@ import { Card } from "react-native-elements";
           {/* <Card containerStyle={styles.card}> */}
             <TextInput
               style={styles.input}
-              placeholder="Email"
-              value={email}
+              placeholder="username"
+              value={username}
               autoCapitalize="none"
-              onChangeText={setEmail}
+              onChangeText={setUsername}
             />
             <TextInput
               style={styles.input}

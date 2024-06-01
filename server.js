@@ -5,6 +5,7 @@ const path = require('path');
 const logger = require('morgan');
 const passport = require('passport');
 const config = require('./config');
+const session = require('express-session');
 
 // const welcomeRouter = require('./screens/WelcomeScreen');
 const userRouter = require('./routes/users');
@@ -62,7 +63,7 @@ app.use((err, req, res, next) => {
   res.render('error');
 });
 
-const port = process.env.PORT || 8081;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

@@ -41,7 +41,7 @@ import { Card } from "react-native-elements";
               
                 await AsyncStorage.setItem("authToken", data.token);
                 Alert.alert("Login Successful", "Welcome back!");
-                navigation.navigate("Home");
+                navigation.navigate("Map");
             } else {
               const errorData = await response.text();
               // const data = JSON.parse(errorData);

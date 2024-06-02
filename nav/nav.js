@@ -5,12 +5,14 @@ import {
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, View, Text} from 'react-native';
+import {SafeAreaView, StyleSheet, View, Text, Platform} from 'react-native';
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHouseFlag } from '@fortawesome/free-solid-svg-icons';
 import HomeScreen from '../screens/HomeScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import LoginScreen from '../screens/LoginScreen';
+import MapScreen from '../screens/MapAndChatScreen';
+
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -76,6 +78,22 @@ const Main = () => {
             <Drawer.Screen
           name="Login"
           component={LoginScreen}
+          options={{
+            headerShown: true,
+            drawerLabelStyle: {color: 'white'},
+            drawerIcon: ({focused}) => (
+              <FontAwesomeIcon
+                icon={faHouseFlag}
+                style={styles.drawerIcon}
+                size={28}
+                color={focused ? 'peru' : 'gray'}
+              />
+            ),
+          }}
+        />
+           <Drawer.Screen
+          name="Map"
+          component={MapScreen}
           options={{
             headerShown: true,
             drawerLabelStyle: {color: 'white'},

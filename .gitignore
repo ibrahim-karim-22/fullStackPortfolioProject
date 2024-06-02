@@ -1,7 +1,7 @@
 # OSX
 #
 .DS_Store
-config.js
+
 # Xcode
 #
 build/
@@ -21,10 +21,13 @@ DerivedData
 *.ipa
 *.xcuserstate
 **/.xcode.env.local
+/ios
+
 
 # Android/IntelliJ
 #
 build/
+/android
 .idea
 .gradle
 local.properties
@@ -33,6 +36,12 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+
+# local env files
+.env*.local
+
+.eas.json
+.env*
 
 # node.js
 #

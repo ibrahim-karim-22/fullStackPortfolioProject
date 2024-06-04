@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "expo start && node server.js",
+    "start": "node server.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "eject": "expo eject",
@@ -34,7 +34,7 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
+    "jade": "^0.29.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.7.0",
     "mongoose": "^6.10.0",
@@ -61,6 +61,8 @@
     "react-native-svg": "15.2.0",
     "react-navigation": "^5.0.0",
     "session-file-store": "^1.5.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "util": "^0.12.5"
   },
   "devDependencies": {

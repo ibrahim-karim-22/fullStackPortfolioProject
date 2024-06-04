@@ -1,10 +1,11 @@
-const express = require('express');
-const router = express.Router();
+import { Text, View } from "react-native";
 
-welcomeRouter
-.route('/')
-.get((req, res) => {
-    res.render('index', { title: 'Welcome!' });
-});
+const WelcomeScreen = () => {
+    return (
+        <View>
+            <Text>WelcomeScreen</Text>
+        </View>
+    );
+};
 
-module.exports = welcomeRouter;
+export default WelcomeScreen;

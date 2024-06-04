@@ -11,8 +11,9 @@ import {
     Alert
   } from "react-native";
   import { useEffect, useState } from "react";
-  import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import { Card } from "react-native-elements";
+ import { CLOUD_KEY } from "@env";
+
+
 
   // import * as SecureStore from "expo-secure-store";
 
@@ -25,7 +26,7 @@ import { Card } from "react-native-elements";
     const handleLogin = async () => {
         setLoading(true);
         try {
-            const response = await fetch(config.CLOUD_KEY + `/users/login`, {
+            const response = await fetch(CLOUD_KEY + `/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -33,9 +34,11 @@ import { Card } from "react-native-elements";
                 body: JSON.stringify({ username, password }),
                 
             });
+            
+            console.log(CLOUD_KEY + `/users/login`);
             console.log("Response status:", response.status);
-            console.log("Response data:", response); 
             const data = await response.json();
+            console.log("Response data:", response); 
 
             if (response.ok) {
               

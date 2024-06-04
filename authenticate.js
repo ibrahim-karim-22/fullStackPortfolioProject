@@ -5,19 +5,19 @@ const jwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const config = require('./config');
+const { SECRET_KEY } = require('./config');
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 exports.getToken = function(user) {
-    return jwt.sign(user, config.SECRET_KEY, {expiresIn: 3600});
+    return jwt.sign(user, SECRET_KEY, {expiresIn: 3600});
 };
 
 const opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = config.SECRET_KEY;
+opts.secretOrKey = SECRET_KEY;
 
 exports.jwtPassport = passport.use(new jwtStrategy(opts, (jwt_payload, done) => {
     console.log("JWT payload: ", jwt_payload);

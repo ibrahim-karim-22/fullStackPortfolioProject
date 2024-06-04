@@ -12,6 +12,7 @@ import { Card } from 'react-native-elements';
 import {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 const config = require('../config');
+import { CLOUD_KEY } from '@env'
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -25,7 +26,7 @@ const SignUpScreen = () => {
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const response = await fetch(config.CLOUD_KEY + `/users/signup`, {
+      const response = await fetch(CLOUD_KEY + `/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,6 +36,7 @@ const SignUpScreen = () => {
       const data = await response.json();
 
       if (response.ok) {
+        console.log(data);
         Alert.alert('Sign Up Successful', 'Welcome!');
         navigation.navigate('Login');
       } else {

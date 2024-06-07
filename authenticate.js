@@ -18,7 +18,7 @@ exports.getToken = function(user, location) {
         email: user.email,
         firstname: user.firstname,
         lastname: user.lastname,
-        coordinates: location.coordinates,
+        // coordinates: location.coordinates,
 
     }, SECRET_KEY, { expiresIn: 3600 });
 };

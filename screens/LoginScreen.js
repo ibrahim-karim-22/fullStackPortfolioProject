@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { CLOUD_KEY } from "@env";
+import  jwtDecode from "jwt-decode";
 
 
 
@@ -39,12 +40,30 @@ const LoginScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
-        const { token } = data;
+        const { token, user } = data;
 
-        if (token) {
+        if (token && user) {
           await AsyncStorage.setItem("authToken", token);
+
+          // const decodedToken = jwtDecode(token);
+          // console.log("Decoded Token:", decodedToken);
+
+          // const userId = decodedToken._id;
+
+
+        await AsyncStorage.setItem("userId", user._id);
+        if (user._id) {
+          const userId = user._id;
+          console.log("User ID:", userId);
+        } else {
+          console.log("No user ID found.");
+        }
+        // await AsyncStorage.setItem("username", user.username);
+        // await AsyncStorage.setItem("email", user.email);
+        // await AsyncStorage.setItem("firstname", user.firstname);
+        // await AsyncStorage.setItem("lastname", user.lastname)
           console.log("Token:", token);
-          userInfo(token);
+          // fetchUserInfo()
           navigation.navigate("Map");
         }
 
@@ -62,33 +81,37 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const userInfo = async (token) => {
-    try {
-      const response = await fetch(CLOUD_KEY + `/users/:id`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const { _id, username, email, firstname, lastname } = data;
-        console.log(data);
-        if (_id && username && email && firstname && lastname) {
-          await AsyncStorage.setItem("userId", _id);
-          await AsyncStorage.setItem("username", username);
-          await AsyncStorage.setItem("email", email);
-          await AsyncStorage.setItem("firstname", firstname);
-          await AsyncStorage.setItem("lastname", lastname);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-
+  // const fetchUserInfo = async () => {
+  //   const token = await AsyncStorage.getItem("authToken");
+  //   if (!token) {
+  //     return;
+  //   }
+  //   try {
+  //     const response = await fetch(CLOUD_KEY + `/users/me`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       const { _id, username, email, firstname, lastname } = data;
+  //       console.log(data);
+  //       if (_id && username && email && firstname && lastname) {
+  //         await AsyncStorage.setItem("userId", _id);
+  //         await AsyncStorage.setItem("username", username);
+  //         await AsyncStorage.setItem("email", email);
+  //         await AsyncStorage.setItem("firstname", firstname);
+  //         await AsyncStorage.setItem("lastname", lastname);
+  //       }
+  //     } else {
+  //       console.log("Error fetching user info:", response.status);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
     return (
       <View style={styles.mainContainer}>
         <KeyboardAvoidingView behavior="padding">

@@ -14,40 +14,56 @@ userRouter
       .catch(err => next(err));
   })
 
-  userRouter.route('/signup').post(async (req, res, next) => {
-    try {
-      const newUser = new User({
-        username: req.body.username,
-        email: req.body.email,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname
-      });
-      await User.register(newUser, req.body.password);
-      console.log('User registered successfully:', newUser);
-      res.status(201).json({ success: true, status: 'Registration Successful!' });
-    } catch (err) {
-      if (err.name === 'UserExistsError') {
-        res.status(409).json({ success: false, message: 'Username already exists!' });
-      } else {
-        res.status(500).json({ success: false, message: 'Registration failed!' });
-      }
+userRouter.route('/signup').post(async (req, res, next) => {
+  try {
+    const newUser = new User({
+      username: req.body.username,
+      email: req.body.email,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname
+    });
+    await User.register(newUser, req.body.password);
+    console.log('User registered successfully:', newUser);
+    res.status(201).json({ success: true, status: 'Registration Successful!' });
+  } catch (err) {
+    if (err.name === 'UserExistsError') {
+      res.status(409).json({ success: false, message: 'Username already exists!' });
+    } else {
+      res.status(500).json({ success: false, message: 'Registration failed!' });
     }
-  });
+  }
+});
 
 userRouter
   .route('/login')
   .post(passport.authenticate('local', { session: false }), (req, res) => {
-    const token = authenticate.getToken({ _id: req.user._id }); 
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.json({ 
-      success: true, 
-      token: token, 
-      status: 'You are successfully logged in!', 
-    });
+    const token = authenticate.getToken({ _id: req.user._id });
+    User.findById(req.user._id)
+      .then(user => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({
+          success: true,
+          token: token,
+          user: {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            // coordinates: user.coordinates
+          },
+          status: 'You are successfully logged in!',
+        });
+      })
+      .catch(err => {
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({ success: false, message: 'error getting user info' })
+      });
   });
 
-  userRouter
+userRouter
   .route('/logout')
   .post((req, res, next) => {
     if (req.session) {
@@ -60,11 +76,11 @@ userRouter
       next(err);
     }
   })
-    
-  
+
+
 userRouter
   .route('/:userId')
-  .get((req, res, next) => {
+  .get(authenticate.verifyUser, (req, res, next) => {
     User.findById(req.params.userId)
       .then(user => res.status(200).json(user))
       .catch(err => next(err));
@@ -76,6 +92,20 @@ userRouter
       .catch(err => next(err));
   });
 
+// userRouter
+//   .route('/me')
+//   .get(authenticate.verifyUser, (req, res, next) => {
+//     User.findById(req.user._id)
+//     // .select('-password')
+//     // .populate('locations')
+//     // .populate('communication')
+//     .then(user => {
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+//     res.status(200).json(user);
+//     })
+//     .catch(err => next(err));
+//   })
 
-
-  module.exports = userRouter;
+module.exports = userRouter;

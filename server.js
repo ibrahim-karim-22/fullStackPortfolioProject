@@ -8,12 +8,12 @@ const config = require('./config');
 const session = require('express-session');
 const http = require('http');
 const socketio = require('socket.io');
-import Location from './models/locationSchema';
-
+const Location = require('./models/locationSchema');
 const welcomeRouter = require('./routes/home');
 const userRouter = require('./routes/users');
 const locationRouter = require('./routes/locations');
 const communicationRouter = require('./routes/communication');
+
 
 
 const url = config.MONGO_KEY;
@@ -40,7 +40,7 @@ app.use(
     secret: config.SECRET_KEY,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 3650 }
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
   }),
 );
 
@@ -63,9 +63,9 @@ app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
+  const title = 'Error';
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', { title: title });
 });
 
 const port = process.env.PORT || 8081;

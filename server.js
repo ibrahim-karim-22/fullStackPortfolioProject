@@ -8,6 +8,7 @@ const config = require('./config');
 const session = require('express-session');
 const http = require('http');
 const socketio = require('socket.io');
+import Location from './models/locationSchema';
 
 const welcomeRouter = require('./routes/home');
 const userRouter = require('./routes/users');
@@ -76,7 +77,7 @@ const io = socketio(server);
 
 io.on ('connection', (socket) => {
   console.log('a user connected');
-
+// console.log('Socket URL:', socket.handshake.url);
   socket.on('updateLocation', async(data) => {
    try {
     const { userId, coordinates } = data;

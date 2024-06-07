@@ -36,6 +36,7 @@
     "http-errors": "~1.6.3",
     "jade": "^0.29.0",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "mongodb": "^6.7.0",
     "mongoose": "^6.10.0",
     "mongoose-currency": "^0.3.0",

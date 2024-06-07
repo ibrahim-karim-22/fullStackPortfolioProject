@@ -10,6 +10,7 @@ const locationSchema = new Schema({
     coordinates: {
         type: {
           type: String,
+          enum: ['Point'],
           default: 'Point'
         },
         coordinates: {
@@ -22,6 +23,8 @@ const locationSchema = new Schema({
         default: Date.now
     }
 })
+
+locationSchema.index({ coordinates: '2dsphere' });
 
 const Location = mongoose.model('Location', locationSchema);
 

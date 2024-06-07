@@ -1,95 +1,126 @@
 const config = require("../config");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-    View,
-    Text,
-    TextInput,
-    Button,
-    StyleSheet,
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Alert
-  } from "react-native";
-  import { useEffect, useState } from "react";
- import { CLOUD_KEY } from "@env";
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Alert
+} from "react-native";
+import { useEffect, useState } from "react";
+import { CLOUD_KEY } from "@env";
 
 
 
-  // import * as SecureStore from "expo-secure-store";
+// import * as SecureStore from "expo-secure-store";
 
-  const LoginScreen = ({ navigation }) => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+const LoginScreen = ({ navigation }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
 
-    const handleLogin = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(CLOUD_KEY + `/users/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, password }),
-                
-            });
-            
-            console.log(CLOUD_KEY + `/users/login`);
-            console.log("Response status:", response.status);
-            const data = await response.json();
-            console.log("Response data:", response); 
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(CLOUD_KEY + `/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-            if (response.ok) {
-              
-                await AsyncStorage.setItem("authToken", data.token);
-                Alert.alert("Login Successful", "Welcome back!");
-                navigation.navigate("Map");
-            } else {
-              const errorData = await response.text();
-              // const data = JSON.parse(errorData);
-                Alert.alert("Error", errorData || "An error occured while logging in.");
-            } 
+      console.log(CLOUD_KEY + `/users/login`);
+      console.log("Response status:", response.status);
 
-        } catch (error) {
-            console.log(error);
-            Alert.alert("Error", "An error occured while logging in.");
-        } finally {
-            setLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        const { token } = data;
+
+        if (token) {
+          await AsyncStorage.setItem("authToken", token);
+          console.log("Token:", token);
+          userInfo(token);
+          navigation.navigate("Map");
         }
+
+      } else {
+        const errorData = await response.text();
+        // const data = JSON.parse(errorData);
+        Alert.alert("Error", errorData || "An error occured while logging in.");
+      }
+
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "An error occured while logging in.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const userInfo = async (token) => {
+    try {
+      const response = await fetch(CLOUD_KEY + `/users/:id`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const { _id, username, email, firstname, lastname } = data;
+        console.log(data);
+        if (_id && username && email && firstname && lastname) {
+          await AsyncStorage.setItem("userId", _id);
+          await AsyncStorage.setItem("username", username);
+          await AsyncStorage.setItem("email", email);
+          await AsyncStorage.setItem("firstname", firstname);
+          await AsyncStorage.setItem("lastname", lastname);
         }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
     return (
-        <View style={styles.mainContainer}>
+      <View style={styles.mainContainer}>
         <KeyboardAvoidingView behavior="padding">
           {/* <Card containerStyle={styles.card}> */}
-            <TextInput
-              style={styles.input}
-              placeholder="username"
-              value={username}
-              autoCapitalize="none"
-              onChangeText={setUsername}
+          <TextInput
+            style={styles.input}
+            placeholder="username"
+            value={username}
+            autoCapitalize="none"
+            onChangeText={setUsername}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            autoCapitalize="none"
+            onChangeText={setPassword}
+            secureTextEntry={true}
+          />
+          <View style={styles.btnContainer}>
+            <Button
+              color={"rgba(124, 252, 0, .7)"}
+              title="Login"
+              onPress={handleLogin}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              autoCapitalize="none"
-              onChangeText={setPassword}
-              secureTextEntry={true}
-            />
-            <View style={styles.btnContainer}>
-              <Button
-                color={"rgba(124, 252, 0, .7)"}
-                title="Login"
-                onPress={handleLogin}
-              />
-            </View>
+          </View>
           {/* </Card> */}
         </KeyboardAvoidingView>
       </View>
     );
   };
-  
+
   const styles = StyleSheet.create({
     mainContainer: {
       flex: 1,
@@ -133,5 +164,5 @@ import {
       backgroundColor: "rgba(240, 255, 240, .3)",
     },
   });
-  
+
   export default LoginScreen;

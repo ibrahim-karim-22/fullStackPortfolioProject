@@ -41,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
       if (response.ok) {
         const data = await response.json();
         console.log("response data:", data);
-        
+
         const { token, user } = data;
         console.log("Token:", token);
         console.log("User:", user);
@@ -52,7 +52,6 @@ const LoginScreen = ({ navigation }) => {
 
           await AsyncStorage.setItem("userId", user._id);
           console.log("User ID:", user._id);
-
           if (user._id) {
             const userId = user._id;
             console.log("User ID:", userId);

@@ -36,15 +36,16 @@ userRouter.route('/signup').post(async (req, res, next) => {
 
 userRouter
   .route('/login')
-  .post(passport.authenticate('local', { session: false }), (req, res) => {
+  .post(passport.authenticate('local', { session: false }), async (req, res) => {
     console.log('req.user:', req.user);
     const token = authenticate.getToken({ _id: req.user._id });
-    User.findById(req.user._id)
-      .then(user => {
+    try {
+      const user = await User.findById(req.user._id);
         if (!user) {
           return res.status(404).json({ success: false, message: 'User not found!' });
         }
         console.log('user found:', user);
+
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json({
@@ -55,18 +56,16 @@ userRouter
             username: user.username,
             email: user.email,
             firstname: user.firstname,
-            lastname: user.lastname,
-            // coordinates: user.coordinates
+            lastname: user.lastname
           },
           status: 'You are successfully logged in!',
         });
-      })
-      .catch(err => {
+    } catch (err) {
         console.error('error fetching user:', err);
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
         res.json({ success: false, message: 'error getting user info' })
-      });
+      }
   });
 
 userRouter

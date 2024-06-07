@@ -6,11 +6,8 @@ import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
 
-import jwtDecode from "jwt-decode"; // Import jwtDecode for decoding JWT tokens
-
 const serverKey = CLOUD_KEY;
 
-// Singleton pattern for socket connection
 let socket;
 
 const getSocket = () => {
@@ -32,28 +29,11 @@ const MapScreen = () => {
   const [userLocations, setUserLocations] = useState({});
   const [localUserId, setLocalUserId] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchUserId = async () => {
-  //     const userId = await AsyncStorage.getItem('userId');
-  //     if (userId) {
-  //       setLocalUserId(userId);
-  //       console.log ('local user id: ', userId);
-  //     } else {
-  //       setLocalUserId(null);
-  //       console.log ('no local user id');
-  //     }
-  //   };
-  //   fetchUserId();
-  // }, []);
-
- 
-
 useEffect(() => {
   const fetchUserId = async () => {
-    const token = await AsyncStorage.getItem("authToken"); // Assuming authToken contains the JWT token
-    if (token) {
-      // const decodedToken = jwtDecode(token); // Decode the JWT token
-      // const userId = decodedToken._id; // Extract the user ID from the decoded token
+    const token = await AsyncStorage.getItem("authToken"); 
+    const userId = await AsyncStorage.getItem("userId");
+    if (userId) {
       setLocalUserId(userId);
       console.log("local user id:", userId);
     } else {

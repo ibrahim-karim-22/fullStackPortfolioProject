@@ -11,13 +11,15 @@ exports.local = passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-exports.getToken = function(user) {
+exports.getToken = function(user, location) {
     return jwt.sign({
         _id: user._id,
         username: user.username,
         email: user.email,
         firstname: user.firstname,
         lastname: user.lastname,
+        coordinates: location.coordinates,
+
     }, SECRET_KEY, { expiresIn: 3600 });
 };
 

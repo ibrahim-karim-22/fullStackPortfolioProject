@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { CLOUD_KEY } from "@env";
-import  jwtDecode from "jwt-decode";
+import jwtDecode from "jwt-decode";
 
 
 
@@ -40,39 +40,37 @@ const LoginScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("response data:", data);
+        
         const { token, user } = data;
+        console.log("Token:", token);
+        console.log("User:", user);
 
         if (token && user) {
           await AsyncStorage.setItem("authToken", token);
-
-          // const decodedToken = jwtDecode(token);
-          // console.log("Decoded Token:", decodedToken);
-
-          // const userId = decodedToken._id;
-
-
-        await AsyncStorage.setItem("userId", user._id);
-        if (user._id) {
-          const userId = user._id;
-          console.log("User ID:", userId);
-        } else {
-          console.log("No user ID found.");
-        }
-        // await AsyncStorage.setItem("username", user.username);
-        // await AsyncStorage.setItem("email", user.email);
-        // await AsyncStorage.setItem("firstname", user.firstname);
-        // await AsyncStorage.setItem("lastname", user.lastname)
           console.log("Token:", token);
-          // fetchUserInfo()
+
+          await AsyncStorage.setItem("userId", user._id);
+          console.log("User ID:", user._id);
+
+          if (user._id) {
+            const userId = user._id;
+            console.log("User ID:", userId);
+          } else {
+            console.log("No user ID found.");
+          }
+
           navigation.navigate("Map");
+        } else {
+          console.log("Token or user is missing in the response.");
+          Alert.alert("Error", "An error occurred while logging in.");
         }
-
       } else {
-        const errorData = await response.text();
-        // const data = JSON.parse(errorData);
-        Alert.alert("Error", errorData || "An error occured while logging in.");
+        const errorData = await response.json(); // Change to response.json() to parse the error data correctly
+        console.log("Error response data:", errorData);
+        Alert.alert("Error", errorData.message || "An error occurred while logging in.");
       }
-
+      
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "An error occured while logging in.");
@@ -81,111 +79,80 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
-  // const fetchUserInfo = async () => {
-  //   const token = await AsyncStorage.getItem("authToken");
-  //   if (!token) {
-  //     return;
-  //   }
-  //   try {
-  //     const response = await fetch(CLOUD_KEY + `/users/me`, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       const { _id, username, email, firstname, lastname } = data;
-  //       console.log(data);
-  //       if (_id && username && email && firstname && lastname) {
-  //         await AsyncStorage.setItem("userId", _id);
-  //         await AsyncStorage.setItem("username", username);
-  //         await AsyncStorage.setItem("email", email);
-  //         await AsyncStorage.setItem("firstname", firstname);
-  //         await AsyncStorage.setItem("lastname", lastname);
-  //       }
-  //     } else {
-  //       console.log("Error fetching user info:", response.status);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-    return (
-      <View style={styles.mainContainer}>
-        <KeyboardAvoidingView behavior="padding">
-          {/* <Card containerStyle={styles.card}> */}
-          <TextInput
-            style={styles.input}
-            placeholder="username"
-            value={username}
-            autoCapitalize="none"
-            onChangeText={setUsername}
+  return (
+    <View style={styles.mainContainer}>
+      <KeyboardAvoidingView behavior="padding">
+        {/* <Card containerStyle={styles.card}> */}
+        <TextInput
+          style={styles.input}
+          placeholder="username"
+          value={username}
+          autoCapitalize="none"
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          autoCapitalize="none"
+          onChangeText={setPassword}
+          secureTextEntry={true}
+        />
+        <View style={styles.btnContainer}>
+          <Button
+            color={"rgba(124, 252, 0, .7)"}
+            title="Login"
+            onPress={handleLogin}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            autoCapitalize="none"
-            onChangeText={setPassword}
-            secureTextEntry={true}
-          />
-          <View style={styles.btnContainer}>
-            <Button
-              color={"rgba(124, 252, 0, .7)"}
-              title="Login"
-              onPress={handleLogin}
-            />
-          </View>
-          {/* </Card> */}
-        </KeyboardAvoidingView>
-      </View>
-    );
-  };
+        </View>
+        {/* </Card> */}
+      </KeyboardAvoidingView>
+    </View>
+  );
+};
 
-  const styles = StyleSheet.create({
-    mainContainer: {
-      flex: 1,
-      backgroundColor: "black",
-    },
-    card: {
-      backgroundColor: "rgba(245, 245, 220, .5)",
-      alignContent: "center",
-      margin: 23,
-      borderRadius: 22,
-    },
-    title: {
-      color: "white",
-      fontSize: 22,
-      marginBottom: 12,
-      textAlign: "center",
-      shadowColor: "black",
-      shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.7,
-      shadowRadius: 10,
-      elevation: 5,
-    },
-    input: {
-      backgroundColor: "gainsboro",
-      fontSize: 18,
-      padding: 22,
-      margin: 5,
-      borderRadius: 222,
-      shadowColor: "rgba(125, 0, 0, .9)",
-      shadowOffset: { width: 3, height: 3 },
-      shadowRadius: 33,
-      elevation: 3,
-    },
-    btnContainer: {
-      margin: -7,
-      padding: 16,
-      color: "rgba(240, 255, 240, .3)",
-    },
-    formCheckbox: {
-      padding: 2,
-      backgroundColor: "rgba(240, 255, 240, .3)",
-    },
-  });
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  card: {
+    backgroundColor: "rgba(245, 245, 220, .5)",
+    alignContent: "center",
+    margin: 23,
+    borderRadius: 22,
+  },
+  title: {
+    color: "white",
+    fontSize: 22,
+    marginBottom: 12,
+    textAlign: "center",
+    shadowColor: "black",
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  input: {
+    backgroundColor: "gainsboro",
+    fontSize: 18,
+    padding: 22,
+    margin: 5,
+    borderRadius: 222,
+    shadowColor: "rgba(125, 0, 0, .9)",
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 33,
+    elevation: 3,
+  },
+  btnContainer: {
+    margin: -7,
+    padding: 16,
+    color: "rgba(240, 255, 240, .3)",
+  },
+  formCheckbox: {
+    padding: 2,
+    backgroundColor: "rgba(240, 255, 240, .3)",
+  },
+});
 
-  export default LoginScreen;
+export default LoginScreen;

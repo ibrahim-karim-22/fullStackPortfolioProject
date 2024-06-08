@@ -9,10 +9,12 @@ const session = require('express-session');
 const http = require('http');
 const socketio = require('socket.io');
 const Location = require('./models/locationSchema');
+const Group = require('./models/groupSchema');
 const welcomeRouter = require('./routes/home');
 const userRouter = require('./routes/users');
 const locationRouter = require('./routes/locations');
 const communicationRouter = require('./routes/communication');
+const { v4: uuidv4 } = require('uuid');
 
 
 
@@ -74,13 +76,50 @@ const server = app.listen(port, () => {
 });
 
 const io = socketio(server);
+const accessKey = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const length = 8; // Adjust the length as needed
+  
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  
+  return result;
+};
 
 io.on ('connection', (socket) => {
   console.log('a user connected');
 // console.log('Socket URL:', socket.handshake.url);
+  socket.on('createGroup', async(data) => {
+    try {
+      const newAccessKey = accessKey();
+      const group = new Group({ accessKey: newAccessKey });
+      await group.save();
+      socket.broadcast.emit('groupCreated', data);
+    } catch (err) {
+      console.error('Error creating group: ', err);
+    }
+  });
+
+  socket.on('joinGroup', async(data) => {
+    try {
+      const { accessKey } = data;
+      const group = await Group.findOne({ accessKey });
+      if (group) {
+        socket.join(accessKey);
+        socket.emit('groupJoined', { groupId: group._id });
+      } else {
+        socket.emit('error', {message: 'invalid access key'});
+      }
+    } catch (err) {
+      console.error('Error joining group: ', err);
+    }
+  });
+
   socket.on('updateLocation', async(data) => {
    try {
-    const { userId, coordinates } = data;
+    const { userId, coordinates, accessKey } = data;
     const location = new Location({
       userId: userId,
       coordinates: {
@@ -90,7 +129,8 @@ io.on ('connection', (socket) => {
       timestamp: new Date(),
     });
     await location.save();
-    socket.broadcast.emit('updateLocation', data);
+    // socket.broadcast.emit('updateLocation', data);
+    io.to(accessKey).emit('locationUpdated', { userId, coordinates });
    } catch (err) {
     console.error('Error updating location: ', err);
    }

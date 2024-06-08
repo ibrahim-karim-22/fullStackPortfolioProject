@@ -5,6 +5,11 @@ import * as Location from 'expo-location';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
+import { useRoute } from '@react-navigation/native';
+
+// ...
+
+
 
 const serverKey = CLOUD_KEY;
 
@@ -25,6 +30,8 @@ const getSocket = () => {
 };
 
 const MapScreen = () => {
+  const route = useRoute();
+  const { groupId } = route.params;
   const [currentLocation, setCurrentLocation] = useState(null);
   const [userLocations, setUserLocations] = useState({});
   const [localUserId, setLocalUserId] = useState(null);
@@ -46,27 +53,8 @@ useEffect(() => {
 
   useEffect(() => {
     const socket = getSocket();
-    
-    const fetchUserLocations = async () => {
-      try {
-        const token = await AsyncStorage.getItem('authToken');
-        response = await fetch(CLOUD_KEY + `/locations/${localUserId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    socket.emit('joinGroup', { accessKey: groupId, userId: localUserId });
 
-        if (response.ok) {
-          const locations = await response.json();
-          setUserLocations(locations);
-      }
-      } catch (error) {
-        console.log('Error fetching user locations:', error);
-      }
-    };
-    if (localUserId) {
     socket.on('locationUpdated', data => {
       console.log('Received location update:', data);
       setUserLocations(prevLocations => ({
@@ -75,18 +63,10 @@ useEffect(() => {
       }));
     });
 
-    socket.on('latestLocations', locations => {
-       setUserLocations(locations);
-    });
-    fetchUserLocations();
-  } 
-
     return () => {
       socket.off('locationUpdated');
-      socket.off('latestLocations');
-      };
-  }, [localUserId]);
-
+    };
+  }, [localUserId, groupId]);    
   const getLocationfromDevice = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -136,7 +116,7 @@ useEffect(() => {
         locationSubscription.remove();
       }
     };
-  }, [localUserId]);
+  }, [localUserId, groupId]);
 
   return (
     <View style={{ flex: 1 }}>

@@ -12,10 +12,6 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { CLOUD_KEY } from "@env";
-import jwtDecode from "jwt-decode";
-
-
-
 // import * as SecureStore from "expo-secure-store";
 
 const LoginScreen = ({ navigation }) => {
@@ -59,7 +55,7 @@ const LoginScreen = ({ navigation }) => {
             console.log("No user ID found.");
           }
 
-          navigation.navigate("Map");
+          navigation.navigate("Home");
         } else {
           console.log("Token or user is missing in the response.");
           Alert.alert("Error", "An error occurred while logging in.");

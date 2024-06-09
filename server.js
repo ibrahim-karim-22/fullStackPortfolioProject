@@ -11,6 +11,7 @@ const socketio = require('socket.io');
 const Location = require('./models/locationSchema');
 const Group = require('./models/groupSchema');
 const Communication = require('./models/communicationSchema');
+const User = require('./models/userSchema');
 const welcomeRouter = require('./routes/home');
 const userRouter = require('./routes/users');
 const locationRouter = require('./routes/locations');
@@ -98,35 +99,28 @@ io.on('connection', (socket) => {
   socket.on('joinGroup', async ({ accessKey, userId }) => {
     try {
       const group = await Group.findOne({ accessKey });
-  
       if (group) {
         const existingMember = group.members.includes(userId);
         if (!existingMember) {
           group.members.push(userId);
           await group.save();
-          socket.emit('groupJoined', { accessKey });
-        } else {
-          socket.emit('groupJoined', { accessKey });
         }
         socket.join(accessKey);
+        socket.emit('groupJoined', { groupName: group.groupName }); 
       } else {
         socket.emit('error', { message: 'Group not found' });
       }
     } catch (err) {
-      console.error('Error joining group:', err.message);
+      console.error('Error joining group:', err);
       socket.emit('error', { message: 'An error occurred while processing your request' });
     }
   });
-
   socket.on('updateLocation', async (data) => {
     try {
       const { userId, coordinates, accessKey } = data;
       const location = new Location({
-        userId: userId,
-        coordinates: {
-          type: 'Point',
-          coordinates,
-        },
+        userId,
+        coordinates: { type: 'Point', coordinates },
         timestamp: new Date(),
       });
       await location.save();
@@ -136,19 +130,24 @@ io.on('connection', (socket) => {
       socket.emit('error', { message: 'Failed to update location', error: err });
     }
   });
-
   socket.on('sendMessage', async (data) => {
     try {
       const { senderId, message, accessKey, timestamp } = data;
-      const newMessage = new Communication({ senderId, message, timestamp });
+      const user = await User.findById(senderId);
+      const newMessage = new Communication({
+        senderId,
+        username: user.username, // Add the username
+        message,
+        timestamp,
+      });
       await newMessage.save();
-      io.to(accessKey).emit('newMessage', newMessage); // Broadcast the message to the group room
+      io.to(accessKey).emit('newMessage', newMessage); 
     } catch (err) {
       console.error('Error sending message:', err);
       socket.emit('error', { message: 'Failed to send message', error: err });
     }
   });
-
+  
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });

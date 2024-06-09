@@ -32,23 +32,16 @@ const MapScreen = ({ route }) => {
   const [groupName, setGroupName] = useState(null); 
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      const userId = await AsyncStorage.getItem('userId');
-      if (userId) {
+      const fetchUserData = async () => {
+        const userId = await AsyncStorage.getItem('userId');
+        const groupName = await AsyncStorage.getItem('groupName');
         setLocalUserId(userId);
+        setGroupName(groupName);
         console.log('Local user id:', userId);
-      } else {
-        setLocalUserId(null);
-        console.log('No local user id');
-      }
-    };
-    fetchUserId();
-
-    
-    AsyncStorage.getItem('groupName').then(groupName => {
-      setGroupName(groupName);
-    });
-  }, []);
+        console.log('Group name:', groupName);
+      };
+      fetchUserData();
+    }, []);
 
   useEffect(() => {
     const socket = getSocket();

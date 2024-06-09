@@ -97,20 +97,5 @@ userRouter
       .catch(err => next(err));
   });
 
-// userRouter
-//   .route('/me')
-//   .get(authenticate.verifyUser, (req, res, next) => {
-//     User.findById(req.user._id)
-//     // .select('-password')
-//     // .populate('locations')
-//     // .populate('communication')
-//     .then(user => {
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
-//     res.status(200).json(user);
-//     })
-//     .catch(err => next(err));
-//   })
 
 module.exports = userRouter;

@@ -58,9 +58,19 @@ const ChatScreen = () => {
     };
     fetchAccessKey();
 
+    const socket = getSocket();
+    socket.on('groupJoined', ({ groupName }) => {
+      console.log('Group Joined:', groupName);
+    });
+
+    socket.on('error', ({ message }) => {
+      Alert.alert('Error', message);
+    });
+
     return () => {
       if (socketRef.current) {
         socketRef.current.off('newMessage');
+        socketRef.current.off('groupJoined');
       }
     };
   }, [localUserId]);
@@ -81,13 +91,19 @@ const ChatScreen = () => {
     }
   };
 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
         data={messages}
         renderItem={({ item }) => (
           <View style={styles.messageContainer}>
-            <Text style={styles.senderId}>{item.senderId}</Text>
+            <Text style={styles.senderId}>{item.username}</Text>
+            <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
             <Text style={styles.message}>{item.message}</Text>
           </View>
         )}
@@ -111,9 +127,16 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     marginVertical: 5,
+    padding: 10,
+    backgroundColor: '#f1f1f1',
+    borderRadius: 5,
   },
   senderId: {
     fontWeight: 'bold',
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#888',
   },
   message: {
     fontSize: 16,

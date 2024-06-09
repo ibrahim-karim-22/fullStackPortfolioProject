@@ -9,11 +9,18 @@ const groupSchema = new Schema({
     },
     groupName: {
         type: String,
+        required: true
     },
-    memebers: [String]
+    members: [{
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        }
+    }]
 }, {
     timestamps: true
-})
+});
 
 const Group = mongoose.model('Group', groupSchema);
 

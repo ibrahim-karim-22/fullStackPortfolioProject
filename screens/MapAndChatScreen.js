@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
 import { useRoute } from '@react-navigation/native';
-
-// ...
-
-
 
 const serverKey = CLOUD_KEY;
 
@@ -29,16 +25,41 @@ const getSocket = () => {
   return socket;
 };
 
-const MapScreen = () => {
-  const route = useRoute();
-  const { groupId } = route.params;
+const MapScreen = ({ route }) => {
+  const { groupId: routeGroupId, groupName: routeGroupName, members: routeMembers } = route.params || {};
   const [currentLocation, setCurrentLocation] = useState(null);
   const [userLocations, setUserLocations] = useState({});
   const [localUserId, setLocalUserId] = useState(null);
+  const [groupId, setGroupId] = useState(routeGroupId || '');
+  const [groupName, setGroupName] = useState(routeGroupName || '');
+  const [members, setMembers] = useState(routeMembers || []);
+ 
+  
+  useEffect(() => {
+    const fetchGroupDetails = async () => {
+      if (!routeGroupId) {
+        const storedGroupId = await AsyncStorage.getItem('groupId');
+        const storedLocalUserId = await AsyncStorage.getItem('userId');
+        const storedGroupName = await AsyncStorage.getItem('groupName');
+        const storedMembers = await AsyncStorage.getItem('members');
+        const members = storedMembers ? JSON.parse(storedMembers) : [];
+
+        console.log('Stored Group ID:', storedGroupId);
+        console.log('Stored Local User ID:', storedLocalUserId);
+
+        setLocalUserId(storedLocalUserId);
+        setGroupId(storedGroupId);
+        setGroupName(storedGroupName);
+        setMembers(members);
+  
+      }
+    };
+
+    fetchGroupDetails();
+  }, [routeGroupId, routeGroupName, routeMembers]); 
 
 useEffect(() => {
   const fetchUserId = async () => {
-    const token = await AsyncStorage.getItem("authToken"); 
     const userId = await AsyncStorage.getItem("userId");
     if (userId) {
       setLocalUserId(userId);
@@ -53,7 +74,19 @@ useEffect(() => {
 
   useEffect(() => {
     const socket = getSocket();
-    socket.emit('joinGroup', { accessKey: groupId, userId: localUserId });
+    if (groupId && localUserId) {
+      socket.emit('joinGroup', { accessKey: groupId, userId: localUserId});
+      
+      socket.on('groupJoined', ({ groupId, groupName, members }) => {
+        setGroupId(groupId);
+        setGroupName(groupName);
+        setMembers(members);
+     
+      });
+
+      socket.on('error', ({ message }) => {
+        Alert.alert('Error', message);
+      });
 
     socket.on('locationUpdated', data => {
       console.log('Received location update:', data);
@@ -65,9 +98,12 @@ useEffect(() => {
 
     return () => {
       socket.off('locationUpdated');
+      socket.off('groupJoined');
     };
-  }, [localUserId, groupId]);    
-  const getLocationfromDevice = async () => {
+  }
+  }, [localUserId, groupId]); 
+
+    const getLocationFromDevice = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -89,11 +125,11 @@ useEffect(() => {
     let locationSubscription;
 
     const fetchLocation = async () => {
-      const location = await getLocationfromDevice();
+      const location = await getLocationFromDevice();
       if (location) {
         setCurrentLocation(location);
         const socket = getSocket();
-        console.log('emmitiging location event', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
+        console.log('emitting location event', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
         socket.emit('updateLocation', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
 
         locationSubscription = await Location.watchPositionAsync(
@@ -101,7 +137,7 @@ useEffect(() => {
           (location) => {
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });
-            console.log('emmiting location update', { userId: localUserId, coordinates: [latitude, longitude] });
+            console.log('emitting location update', { userId: localUserId, coordinates: [latitude, longitude] });
             socket.emit('updateLocation', { userId: localUserId, coordinates: [latitude, longitude] });
           }
         );
@@ -120,6 +156,7 @@ useEffect(() => {
 
   return (
     <View style={{ flex: 1 }}>
+      <Text style={styles.groupInfo}>{groupName}</Text>
       {currentLocation ? (
         <MapView
           style={{ flex: 1 }}
@@ -155,5 +192,14 @@ useEffect(() => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  groupInfo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'green',
+  },
+});
 
 export default MapScreen;

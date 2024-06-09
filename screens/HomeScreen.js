@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import {
   ScrollView,
@@ -8,14 +7,13 @@ import {
   Button,
   Modal,
   TextInput,
-  Alert
+  Alert,
 } from 'react-native';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
 
 const serverKey = CLOUD_KEY;
-
 let socket;
 
 const getSocket = () => {
@@ -30,11 +28,13 @@ const getSocket = () => {
     });
   }
   return socket;
-}
+};
+
 const HomeScreen = ({ navigation }) => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
   const [accessKey, setAccessKey] = useState('');
+  const [groupName, setGroupName] = useState('');
   const [generatedKey, setGeneratedKey] = useState('');
 
   useEffect(() => {
@@ -45,37 +45,53 @@ const HomeScreen = ({ navigation }) => {
       Alert.alert('Group Created', `Access key: ${accessKey}`);
     });
 
-    socket.on('groupJoined', ({ groupId }) => {
+    socket.on('groupJoined', ({ accessKey, groupId, groupName, members }) => {
       AsyncStorage.setItem('groupId', groupId);
-      navigation.navigate('Map', { groupId });
+      AsyncStorage.setItem('groupName', groupName);
+      AsyncStorage.setItem('members', JSON.stringify(members));
+      AsyncStorage.setItem('accessKey', accessKey);
+
+      navigation.navigate('Map', { accessKey, groupId, groupName, members });
     });
 
     socket.on('error', ({ message }) => {
+      console.log('Error:', message);
       Alert.alert('Error', message);
     });
+
+    return () => {
+      socket.off('groupCreated');
+      socket.off('groupJoined');
+      socket.off('error');
+    };
   }, []);
 
   const createGroup = async () => {
     try {
       const socket = getSocket();
-      await socket.emit('createGroup');
+      const members = [];
+      await socket.emit('createGroup', { groupName, members });
       const accessKey = await new Promise((resolve) => {
         socket.once('groupCreated', (key) => resolve(key));
       });
       setGeneratedKey(accessKey);
       console.log('Group created:', accessKey);
-      Alert.alert('Group Created', `Access key: ${accessKey}`);
     } catch (error) {
       console.error('Error creating group:', error);
     }
   };
 
-  const joinGroup = () => {
-    const socket = getSocket();
-    const userId = AsyncStorage.getItem('userId');
-    socket.emit('joinGroup', { userId, accessKey });
+  const joinGroup = async (accessKey) => {
+    try {
+      const socket = getSocket();
+      const userId = await AsyncStorage.getItem('userId');
+      console.log('Joining group with accessKey:', accessKey, 'and userId:', userId);
+      socket.emit('joinGroup', { userId, accessKey});
+    } catch (error) {
+      console.error('Error joining group:', error);
+      Alert.alert('Error', 'Failed to join group. Please try again.');
+    }
   };
-
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -85,15 +101,24 @@ const HomeScreen = ({ navigation }) => {
       <Modal visible={isCreateModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <Text>Generate Access Key</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Group Name"
+            value={groupName}
+            onChangeText={setGroupName}
+          />
           {generatedKey ? (
-            <Text style={styles.accessKey}>Access Key: {generatedKey} </Text>
+            <Text style={styles.accessKey}>Access Key: {generatedKey}</Text>
           ) : (
-            <Button title='Generate access key' onPress={createGroup} />
+            <Button
+            title="Generate Access Key"
+            onPress={createGroup}
+            disabled={!groupName}
+          />
           )}
-          <Button title='close' onPress={() => setIsCreateModalVisible(false)} />
-        </View>
+      <Button title="Close" onPress={() => setIsCreateModalVisible(false)} />        
+      </View>
       </Modal>
-
 
       <Modal visible={isJoinModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
@@ -103,13 +128,17 @@ const HomeScreen = ({ navigation }) => {
             value={accessKey}
             onChangeText={setAccessKey}
           />
-          <Button title='Join Group' onPress={joinGroup} />
-          <Button title='close' onPress={() => setIsJoinModalVisible(false)} />
+          <Button
+            title="Join Group"
+            onPress={() => joinGroup(accessKey)}
+            disabled={!accessKey}
+          />
+          <Button title="Close" onPress={() => setIsJoinModalVisible(false)} />
         </View>
       </Modal>
     </ScrollView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -129,6 +158,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black',
     marginBottom: 10,
+    borderColor: 'gray'
   },
   accessKey: {
     fontSize: 20,

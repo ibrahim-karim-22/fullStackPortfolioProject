@@ -12,6 +12,7 @@ import HomeScreen from '../screens/HomeScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MapScreen from '../screens/MapAndChatScreen';
+import TabScreen from '../screens/TabScreen';
 
 
 const Drawer = createDrawerNavigator();
@@ -94,6 +95,22 @@ const Main = () => {
            <Drawer.Screen
           name="Map"
           component={MapScreen}
+          options={{
+            headerShown: true,
+            drawerLabelStyle: {color: 'white'},
+            drawerIcon: ({focused}) => (
+              <FontAwesomeIcon
+                icon={faHouseFlag}
+                style={styles.drawerIcon}
+                size={28}
+                color={focused ? 'peru' : 'gray'}
+              />
+            ),
+          }}
+        />
+          <Drawer.Screen
+          name="TabScreen"
+          component={TabScreen}
           options={{
             headerShown: true,
             drawerLabelStyle: {color: 'white'},

@@ -35,61 +35,42 @@ const HomeScreen = ({ navigation }) => {
   const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
   const [accessKey, setAccessKey] = useState('');
   const [groupName, setGroupName] = useState('');
-  const [generatedKey, setGeneratedKey] = useState('');
+ 
 
   useEffect(() => {
     const socket = getSocket();
-  
-    socket.on('groupCreated', async ({ accessKey, groupId, groupName, members }) => {
-      setGeneratedKey(accessKey);
-      AsyncStorage.setItem('groupId', groupId);
-      AsyncStorage.setItem('groupName', groupName);
-      AsyncStorage.setItem('members', JSON.stringify(members));
+
+    socket.on('groupCreated', ({ accessKey }) => {
+      setAccessKey(accessKey);
       AsyncStorage.setItem('accessKey', accessKey);
       Alert.alert('Group Created', `Access key: ${accessKey}`);
     });
-  
-    socket.on('groupJoined', ({ accessKey, groupId, groupName, members }) => {
-      AsyncStorage.setItem('groupId', groupId);
-      AsyncStorage.setItem('groupName', groupName);
-      AsyncStorage.setItem('members', JSON.stringify(members));
-      AsyncStorage.setItem('accessKey', accessKey);
-  
-      navigation.navigate('Map', { accessKey, groupId, groupName, members });
+
+    socket.on('groupJoined', ({ accessKey }) => {
+      navigation.navigate('TabScreen', { accessKey });
     });
-  
+
     socket.on('error', ({ message }) => {
-      console.log('Error:', message);
       Alert.alert('Error', message);
     });
-  
+
     return () => {
       socket.off('groupCreated');
       socket.off('groupJoined');
       socket.off('error');
     };
-  }, []);
-  
-  const createGroup = async () => {
-    try {
-      const socket = getSocket();
-      const members = [];
-      socket.emit('createGroup', { groupName, members });
-    } catch (error) {
-      console.error('Error creating group:', error);
-    }
+  }, [navigation]);
+
+  const createGroup = () => {
+    const socket = getSocket();
+
+    AsyncStorage.setItem('groupName', groupName);
+    socket.emit('createGroup', { groupName });
   };
-  
-  const joinGroup = async (accessKey) => {
-    try {
-      const socket = getSocket();
-      const userId = await AsyncStorage.getItem('userId');
-      console.log('Joining group with accessKey:', accessKey, 'and userId:', userId);
-      socket.emit('joinGroup', { userId, accessKey });
-    } catch (error) {
-      console.error('Error joining group:', error);
-      Alert.alert('Error', 'Failed to join group. Please try again.');
-    }
+
+  const joinGroup = (accessKey) => {
+    const socket = getSocket();
+    socket.emit('joinGroup', { accessKey });
   };
 
   return (
@@ -106,8 +87,8 @@ const HomeScreen = ({ navigation }) => {
             value={groupName}
             onChangeText={setGroupName}
           />
-          {generatedKey ? (
-            <Text style={styles.accessKey}>Access Key: {generatedKey}</Text>
+          {accessKey ? (
+            <Text style={styles.accessKey}>Access Key: {accessKey}</Text>
           ) : (
             <Button
             title="Generate Access Key"

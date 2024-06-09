@@ -26,67 +26,43 @@ const getSocket = () => {
 };
 
 const MapScreen = ({ route }) => {
-  const { groupId: routeGroupId, groupName: routeGroupName, members: routeMembers } = route.params || {};
   const [currentLocation, setCurrentLocation] = useState(null);
   const [userLocations, setUserLocations] = useState({});
   const [localUserId, setLocalUserId] = useState(null);
-  const [groupId, setGroupId] = useState(routeGroupId || '');
-  const [groupName, setGroupName] = useState(routeGroupName || '');
-  const [members, setMembers] = useState(routeMembers || []);
- 
-  
+  const [groupName, setGroupName] = useState(null); 
+
   useEffect(() => {
-    const fetchGroupDetails = async () => {
-      if (!routeGroupId) {
-        const storedGroupId = await AsyncStorage.getItem('groupId');
-        const storedLocalUserId = await AsyncStorage.getItem('userId');
-        const storedGroupName = await AsyncStorage.getItem('groupName');
-        const storedMembers = await AsyncStorage.getItem('members');
-        const members = storedMembers ? JSON.parse(storedMembers) : [];
-
-        console.log('Stored Group ID:', storedGroupId);
-        console.log('Stored Local User ID:', storedLocalUserId);
-
-        setLocalUserId(storedLocalUserId);
-        setGroupId(storedGroupId);
-        setGroupName(storedGroupName);
-        setMembers(members);
-  
+    const fetchUserId = async () => {
+      const userId = await AsyncStorage.getItem('userId');
+      if (userId) {
+        setLocalUserId(userId);
+        console.log('Local user id:', userId);
+      } else {
+        setLocalUserId(null);
+        console.log('No local user id');
       }
     };
+    fetchUserId();
 
-    fetchGroupDetails();
-  }, [routeGroupId, routeGroupName, routeMembers]); 
-
-useEffect(() => {
-  const fetchUserId = async () => {
-    const userId = await AsyncStorage.getItem("userId");
-    if (userId) {
-      setLocalUserId(userId);
-      console.log("local user id:", userId);
-    } else {
-      setLocalUserId(null);
-      console.log("no local user id");
-    }
-  };
-  fetchUserId();
-}, []);
+    
+    AsyncStorage.getItem('groupName').then(groupName => {
+      setGroupName(groupName);
+    });
+  }, []);
 
   useEffect(() => {
     const socket = getSocket();
-    if (groupId && localUserId) {
-      socket.emit('joinGroup', { accessKey: groupId, userId: localUserId});
-      
-      socket.on('groupJoined', ({ groupId, groupName, members }) => {
-        setGroupId(groupId);
-        setGroupName(groupName);
-        setMembers(members);
-     
-      });
+    AsyncStorage.getItem('accessKey').then(accessKey => {
+      socket.emit('joinGroup', { accessKey });
+    });
 
-      socket.on('error', ({ message }) => {
-        Alert.alert('Error', message);
-      });
+    socket.on('groupJoined', ({ groupName }) => {
+      console.log('Group Joined:', groupName); 
+    });
+
+    socket.on('error', ({ message }) => {
+      Alert.alert('Error', message);
+    });
 
     socket.on('locationUpdated', data => {
       console.log('Received location update:', data);
@@ -100,10 +76,9 @@ useEffect(() => {
       socket.off('locationUpdated');
       socket.off('groupJoined');
     };
-  }
-  }, [localUserId, groupId]); 
+  }, []);
 
-    const getLocationFromDevice = async () => {
+  const getLocationFromDevice = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -129,7 +104,7 @@ useEffect(() => {
       if (location) {
         setCurrentLocation(location);
         const socket = getSocket();
-        console.log('emitting location event', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
+        console.log('Emitting location event', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
         socket.emit('updateLocation', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
 
         locationSubscription = await Location.watchPositionAsync(
@@ -137,12 +112,13 @@ useEffect(() => {
           (location) => {
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });
-            console.log('emitting location update', { userId: localUserId, coordinates: [latitude, longitude] });
+            console.log('Emitting location update', { userId: localUserId, coordinates: [latitude, longitude] });
             socket.emit('updateLocation', { userId: localUserId, coordinates: [latitude, longitude] });
           }
         );
       }
     };
+
     if (localUserId) {
       fetchLocation();
     }
@@ -152,7 +128,7 @@ useEffect(() => {
         locationSubscription.remove();
       }
     };
-  }, [localUserId, groupId]);
+  }, [localUserId]);
 
   return (
     <View style={{ flex: 1 }}>

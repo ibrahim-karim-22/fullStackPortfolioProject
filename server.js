@@ -74,7 +74,7 @@ const server = app.listen(port, () => {
 
 const io = socketio(server);
 
-const accessKey = () => {
+const newAccessKey = () => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   const length = 8;
@@ -88,36 +88,46 @@ const accessKey = () => {
 
 io.on('connection', (socket) => {
   console.log('a user connected');
-  console.log('Socket URL:', socket.handshake.url);
+  
   socket.on('createGroup', async (data) => {
     try {
-      const newAccessKey = accessKey();
+      const accessKey = newAccessKey();
       const { groupName, members } = data;
+      console.log('Creating group with name:', groupName, 'and accessKey:', accessKey);
+
       const group = new Group({
-        accessKey: newAccessKey,
+        accessKey: accessKey,
         groupName: groupName || 'My Group',
         members: members || [],
       });
       await group.save();
-      socket.emit('groupCreated', newAccessKey);
+      console.log('Group created successfully:', group);
+
+      socket.emit('groupCreated', {
+        accessKey: group.accessKey,
+        groupId: group._id,
+        groupName: group.groupName,
+        members: group.members,
+      });
     } catch (err) {
-      console.error('Error creating group: ', err);
+      console.error('Error creating group:', err);
       socket.emit('error', { message: 'Failed to create group', error: err });
     }
   });
+  
   socket.on('joinGroup', async (data) => {
     try {
       const { accessKey, userId } = data;
-      console.log('Received joinGroup with accessKey:', accessKey, 'and userId:', userId);
+      console.log('Attempting to join group with accessKey:', accessKey, 'and userId:', userId);
   
       const group = await Group.findOne({ accessKey });
   
       if (group) {
         console.log('Group found:', group);
   
-        const existingMember = group.members.find(member => member.userId === userId);
+        const existingMember = group.members.find(member => member.toString() === userId);
         if (!existingMember) {
-          group.members.push({ userId });
+          group.members.push(userId);
           await group.save();
           console.log('User added to group:', userId);
         } else {
@@ -125,19 +135,24 @@ io.on('connection', (socket) => {
         }
   
         socket.join(accessKey);
-        socket.emit('groupJoined', { accessKey: accessKey });
+        socket.emit('groupJoined', {
+          accessKey: group.accessKey,
+          groupId: group._id,
+          groupName: group.groupName,
+          members: group.members,
+        });
+
       } else {
-        console.log('Group not found');
+        console.log('Group not found with accessKey:', accessKey);
         socket.emit('error', { message: 'Group not found' });
       }
+
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Error joining group:', err.message);
       socket.emit('error', { message: 'An error occurred while processing your request' });
     }
+
   });
-  
-
-
 
   socket.on('updateLocation', async (data) => {
     try {
@@ -153,10 +168,10 @@ io.on('connection', (socket) => {
       await location.save();
       io.to(accessKey).emit('locationUpdated', { userId, coordinates });
     } catch (err) {
-      console.error('Error updating location: ', err);
+      console.error('Error updating location:', err);
       socket.emit('error', { message: 'Failed to update location', error: err });
     }
-  })
+  });
 
   socket.on('disconnect', () => {
     console.log('user disconnected');

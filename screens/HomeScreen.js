@@ -39,54 +39,53 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     const socket = getSocket();
-
-    socket.on('groupCreated', (accessKey) => {
+  
+    socket.on('groupCreated', async ({ accessKey, groupId, groupName, members }) => {
       setGeneratedKey(accessKey);
+      AsyncStorage.setItem('groupId', groupId);
+      AsyncStorage.setItem('groupName', groupName);
+      AsyncStorage.setItem('members', JSON.stringify(members));
+      AsyncStorage.setItem('accessKey', accessKey);
       Alert.alert('Group Created', `Access key: ${accessKey}`);
     });
-
+  
     socket.on('groupJoined', ({ accessKey, groupId, groupName, members }) => {
       AsyncStorage.setItem('groupId', groupId);
       AsyncStorage.setItem('groupName', groupName);
       AsyncStorage.setItem('members', JSON.stringify(members));
       AsyncStorage.setItem('accessKey', accessKey);
-
+  
       navigation.navigate('Map', { accessKey, groupId, groupName, members });
     });
-
+  
     socket.on('error', ({ message }) => {
       console.log('Error:', message);
       Alert.alert('Error', message);
     });
-
+  
     return () => {
       socket.off('groupCreated');
       socket.off('groupJoined');
       socket.off('error');
     };
   }, []);
-
+  
   const createGroup = async () => {
     try {
       const socket = getSocket();
       const members = [];
-      await socket.emit('createGroup', { groupName, members });
-      const accessKey = await new Promise((resolve) => {
-        socket.once('groupCreated', (key) => resolve(key));
-      });
-      setGeneratedKey(accessKey);
-      console.log('Group created:', accessKey);
+      socket.emit('createGroup', { groupName, members });
     } catch (error) {
       console.error('Error creating group:', error);
     }
   };
-
+  
   const joinGroup = async (accessKey) => {
     try {
       const socket = getSocket();
       const userId = await AsyncStorage.getItem('userId');
       console.log('Joining group with accessKey:', accessKey, 'and userId:', userId);
-      socket.emit('joinGroup', { userId, accessKey});
+      socket.emit('joinGroup', { userId, accessKey });
     } catch (error) {
       console.error('Error joining group:', error);
       Alert.alert('Error', 'Failed to join group. Please try again.');

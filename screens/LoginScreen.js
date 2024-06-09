@@ -61,7 +61,7 @@ const LoginScreen = ({ navigation }) => {
           Alert.alert("Error", "An error occurred while logging in.");
         }
       } else {
-        const errorData = await response.json(); // Change to response.json() to parse the error data correctly
+        const errorData = await response.json(); 
         console.log("Error response data:", errorData);
         Alert.alert("Error", errorData.message || "An error occurred while logging in.");
       }

@@ -23,13 +23,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'gold',
     padding: 5,
     borderRadius: 5,
-    overflow: 'hidden',
+    overflow: 'visible',
     fontSize: 18,
     marginTop: 1,
   },
   markerText: {
     fontSize: 18,
     color: 'black',
+    zIndex: 1,
   },
   pointer: {
     width: 0,

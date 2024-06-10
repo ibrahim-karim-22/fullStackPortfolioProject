@@ -6,11 +6,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Alert
+  Alert,
+  TouchableOpacity,
+  Animated
 } from 'react-native';
 import { Card } from 'react-native-elements';
-import {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigation } from '@react-navigation/native';
 const config = require('../config');
 import { CLOUD_KEY } from '@env'
 
@@ -23,6 +25,19 @@ const SignUpScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const btnY = useRef(new Animated.Value(500)).current;
+  
+  useEffect(() => {
+      Animated.stagger(100, [
+        Animated.timing(btnY, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, [btnY]);
+
+
   const handleSignUp = async () => {
     setLoading(true);
     try {
@@ -31,7 +46,7 @@ const SignUpScreen = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({firstname, lastname, username, email, password}),
+        body: JSON.stringify({ firstname, lastname, username, email, password }),
       });
       const data = await response.json();
 
@@ -56,6 +71,7 @@ const SignUpScreen = () => {
   return (
     <View style={styles.mainContainer}>
       <KeyboardAvoidingView behavior="padding">
+      <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
         <Card containerStyle={styles.card}>
           <TextInput
             style={styles.input}
@@ -71,7 +87,7 @@ const SignUpScreen = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="username"
+            placeholder="Username"
             value={username}
             onChangeText={setUsername}
           />
@@ -94,13 +110,16 @@ const SignUpScreen = () => {
             <ActivityIndicator size="large" color="steelblue" />
           ) : (
             <>
-              <View style={styles.btn}>
-                <Button title="SignUp" color={'rgba(130, 0, 0, .7)'} onPress={handleSignUp} />
-
-              </View>
+              <TouchableOpacity
+                style={styles.btn}
+                onPress={() => handleSignUp()}
+              >
+                <Text style={styles.buttonText}>Sign Up</Text>
+              </TouchableOpacity>
             </>
           )}
         </Card>
+        </Animated.View>
       </KeyboardAvoidingView>
     </View>
   );
@@ -109,13 +128,20 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: 'snow',
   },
   card: {
-    backgroundColor: 'silver',
+    backgroundColor: 'snow',
     alignContent: 'center',
     margin: 23,
-    borderRadius: 22,
+    borderRadius: 2,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    elevation: 8,
+    // alignSelf: 'center',
+    alignItems: 'center',
   },
   title: {
     color: 'white',
@@ -123,25 +149,47 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'center',
     shadowColor: 'black',
-    shadowOffset: {width: 1, height: 1},
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.7,
     shadowRadius: 10,
     elevation: 5,
   },
   input: {
     backgroundColor: 'gainsboro',
-    fontSize: 18,
-    padding: 22,
+    fontSize: 15,
+    padding: 11,
     margin: 5,
-    borderRadius: 222,
-    shadowColor: 'rgba(125, 0, 0, .9)',
-    shadowOffset: {width: 3, height: 3},
-    shadowRadius: 33,
-    elevation: 3,
+    borderRadius: 2,
+    shadowColor: 'black',
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 3,
+    elevation: 8,
   },
   btn: {
-    margin: -7,
-    padding: 16,
+    backgroundColor: 'gold',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignSelf: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'snow',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif-condensed',
+    textAlign: 'center',
+    textShadowColor: '#222',
+    textShadowOffset: { width: .7, height: .7 },
+    textShadowRadius: 1,
+    alignContent: 'center',
+    alignItems: 'center',
   },
 });
 

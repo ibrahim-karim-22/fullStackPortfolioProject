@@ -12,8 +12,9 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 const Stack = createStackNavigator();
 const Nav = () => {
   const screenOptions = {
-    headerTintColor: "white",
-    headerStyle: { backgroundColor: "black" },
+    headerTintColor: "black",
+    headerStyle: { backgroundColor: "gold" },
+    headerTitleStyle: { fontFamily: "sans-serif-condensed", fontSize: 18, color: "black" },
   };
 
   return (
@@ -31,6 +32,7 @@ const Nav = () => {
         <Stack.Screen
           name='SignUp'
           component={SignUpScreen}
+          
         />
         <Stack.Screen
           name='Main'

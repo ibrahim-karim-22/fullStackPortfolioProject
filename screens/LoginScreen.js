@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -7,8 +6,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Alert
-} from "react-native";
+  Alert,
+  TouchableOpacity,
+  Animated
+  } from "react-native";
+  import { useEffect, useRef } from "react";
+  import { Card } from 'react-native-elements';
+  import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { CLOUD_KEY } from "@env";
 
@@ -17,6 +21,19 @@ const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const btnY = useRef(new Animated.Value(500)).current;
+  
+    useEffect(() => {
+        Animated.stagger(100, [
+          Animated.timing(btnY, {
+            toValue: 0,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, [btnY]);
+
 
 
   const handleLogin = async () => {
@@ -76,7 +93,8 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.mainContainer}>
       <KeyboardAvoidingView behavior="padding">
-        {/* <Card containerStyle={styles.card}> */}
+      <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
+        <Card containerStyle={styles.card}>
         <TextInput
           style={styles.input}
           placeholder="username"
@@ -92,14 +110,16 @@ const LoginScreen = ({ navigation }) => {
           onChangeText={setPassword}
           secureTextEntry={true}
         />
-        <View style={styles.btnContainer}>
-          <Button
-            color={"rgba(124, 252, 0, .7)"}
-            title="Login"
-            onPress={handleLogin}
-          />
-        </View>
+        <TouchableOpacity
+                style={styles.btn}
+                onPress={() => handleLogin()}
+                color={"rgba(124, 252, 0, .7)"}
+            >
+                <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
         {loading && <ActivityIndicator size="large" color="rgba(124, 252, 0, .7)" />}
+        </Card>
+        </Animated.View>
       </KeyboardAvoidingView>
     </View>
   );
@@ -108,13 +128,20 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "snow",
   },
   card: {
-    backgroundColor: "rgba(245, 245, 220, .5)",
-    alignContent: "center",
+    backgroundColor: 'snow',
+    alignContent: 'center',
     margin: 23,
-    borderRadius: 22,
+    borderRadius: 2,
+    shadowColor: 'black',
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    elevation: 8,
+    // alignSelf: 'center',
+    alignItems: 'center',
   },
   title: {
     color: "white",
@@ -128,25 +155,41 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   input: {
-    backgroundColor: "gainsboro",
-    fontSize: 18,
-    padding: 22,
+    backgroundColor: 'gainsboro',
+    fontSize: 15,
+    padding: 11,
     margin: 5,
-    borderRadius: 222,
-    shadowColor: "rgba(125, 0, 0, .9)",
+    borderRadius: 2,
+    shadowColor: 'black',
     shadowOffset: { width: 3, height: 3 },
-    shadowRadius: 33,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 8,
   },
-  btnContainer: {
-    margin: -7,
-    padding: 16,
-    color: "rgba(240, 255, 240, .3)",
-  },
-  formCheckbox: {
-    padding: 2,
-    backgroundColor: "rgba(240, 255, 240, .3)",
-  },
+  btn: {
+    backgroundColor: 'rgba(255,105,180, 1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignSelf: 'center',
+},
+buttonText: {
+    fontSize: 18,
+    color: 'snow',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif-condensed',
+    textAlign: 'center',
+    textShadowColor: '#222', 
+    textShadowOffset: { width: .7, height: .7 }, 
+    textShadowRadius: 1,
+    fontSize: 22
+},
 });
 
 export default LoginScreen;

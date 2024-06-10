@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Text, View, TextInput, Button, FlatList, Keyboard, StyleSheet, Alert } from 'react-native';
 import socketIOClient from 'socket.io-client';
 import { CLOUD_KEY } from '@env';

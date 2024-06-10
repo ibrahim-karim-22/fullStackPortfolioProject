@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -8,7 +8,10 @@ import {
   Modal,
   TextInput,
   Alert,
+  TouchableOpacity,
+  Animated
 } from 'react-native';
+
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
@@ -35,7 +38,18 @@ const HomeScreen = ({ navigation }) => {
   const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
   const [accessKey, setAccessKey] = useState('');
   const [groupName, setGroupName] = useState('');
- 
+
+  const btnY = useRef(new Animated.Value(500)).current;
+
+  useEffect(() => {
+    Animated.stagger(100, [
+      Animated.timing(btnY, {
+        toValue: 0,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [btnY]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -76,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
   const handleLogout = async () => {
     try {
       const userId = await AsyncStorage.getItem('userId');
-      
+
       if (userId) {
         let response = await fetch(`${serverKey}/locations/${userId}`, {
           method: 'DELETE',
@@ -116,12 +130,27 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="Create Group" onPress={() => setIsCreateModalVisible(true)} />
-      <Button title="Join Group" onPress={() => setIsJoinModalVisible(true)} />
+      <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
+      <TouchableOpacity
+        style={styles.createBtn}
+        onPress={() => setIsCreateModalVisible(true)}
+        color={"rgba(124, 252, 0, .7)"}
+      >
+        <Text style={styles.buttonText}>Create Group</Text>
+      </TouchableOpacity>
+      </Animated.View>
 
+      <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
+      <TouchableOpacity
+        style={styles.joinBtn}
+        onPress={() => setIsJoinModalVisible(true)}
+        color={"rgba(124, 252, 0, .7)"}
+      >
+        <Text style={styles.buttonText}>Join Group</Text>
+      </TouchableOpacity>
+      </Animated.View>
       <Modal visible={isCreateModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
-          <Text>Generate Access Key</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Group Name"
@@ -131,14 +160,23 @@ const HomeScreen = ({ navigation }) => {
           {accessKey ? (
             <Text style={styles.accessKey}>Access Key: {accessKey}</Text>
           ) : (
-            <Button
-            title="Generate Access Key"
-            onPress={createGroup}
-            disabled={!groupName}
-          />
+            <TouchableOpacity
+              style={[styles.button, !groupName ? styles.disabledButton : null]}
+              onPress={createGroup}
+              disabled={!groupName}
+            >
+              <Text style={styles.buttonText}>Generate Access Key</Text>
+            </TouchableOpacity>
           )}
-      <Button title="Close" onPress={() => setIsCreateModalVisible(false)} />        
-      </View>
+
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => setIsCreateModalVisible(false)}
+            color={"rgba(124, 252, 0, .7)"}
+          >
+            <Text style={styles.buttonText}>Back</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
 
       <Modal visible={isJoinModalVisible} animationType="slide">
@@ -149,19 +187,30 @@ const HomeScreen = ({ navigation }) => {
             value={accessKey}
             onChangeText={setAccessKey}
           />
-          <Button
-            title="Join Group"
+          <TouchableOpacity
+            style={[styles.button, !accessKey ? styles.disabledButton : null]}
             onPress={() => joinGroup(accessKey)}
             disabled={!accessKey}
-          />
-          <Button title="Close" onPress={() => setIsJoinModalVisible(false)} />
+          >
+            <Text style={styles.buttonText}>Join Group</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => setIsJoinModalVisible(false)}
+            color={"rgba(124, 252, 0, .7)"}
+          >
+            <Text style={styles.buttonText}>Back</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
-      <Button
-        title="Logout"
+      <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
+      <TouchableOpacity
+        style={styles.logoutBtn}
         onPress={handleLogout}
-        color="red"
-      />
+      >
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
+      </Animated.View>
     </ScrollView>
   );
 };
@@ -172,25 +221,127 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
   modalContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 10,
   },
   input: {
-    width: 200,
-    height: 44,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'black',
-    marginBottom: 10,
-    borderColor: 'gray'
+    backgroundColor: 'honeydew',
+    fontSize: 22,
+    padding: 22,
+    margin: 11,
+    borderRadius: 2,
+    shadowColor: 'black',
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 3,
+    elevation: 8,
+    width: 300,
   },
   accessKey: {
     fontSize: 20,
     color: 'green',
-  
-  }
+    margin: 10,
+  },
+  button: {
+    backgroundColor: 'rgba(124,252,0,1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignItems: 'center',
+  },
+  createBtn: {
+    backgroundColor: 'rgba(255,105,180, 1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignSelf: 'center',
+  },
+  joinBtn: {
+    backgroundColor: 'rgba(255,215,0,1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignSelf: 'center',
+  },
+  logoutBtn: {
+    backgroundColor: 'rgba(178,34,34,1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignSelf: 'center',
+    top: 100,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'snow',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif-condensed',
+    textAlign: 'center',
+    textShadowColor: '#222',
+    textShadowOffset: { width: 0.7, height: 0.7 },
+    textShadowRadius: 1,
+  },
+  backBtn: {
+    backgroundColor: 'rgba(70,130,180,1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignSelf: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'snow',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif-condensed',
+    textAlign: 'center',
+    textShadowColor: '#222',
+    textShadowOffset: { width: 0.7, height: 0.7 },
+    textShadowRadius: 1,
+  },
+  disabledButton: {
+    backgroundColor: '#B0C4DE', 
+  },
 });
 
 export default HomeScreen;

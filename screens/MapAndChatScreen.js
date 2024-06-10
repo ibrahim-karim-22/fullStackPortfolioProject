@@ -5,7 +5,6 @@ import * as Location from 'expo-location';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
-import { useRoute } from '@react-navigation/native';
 
 const serverKey = CLOUD_KEY;
 
@@ -101,7 +100,7 @@ const MapScreen = ({ route }) => {
         socket.emit('updateLocation', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
 
         locationSubscription = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, timeInterval: 2000, distanceInterval: 10 },
+          { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 20 },
           (location) => {
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });
@@ -164,10 +163,15 @@ const MapScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   groupInfo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: 'green',
+    fontSize: 22,
+        fontFamily: 'sans-serif-condensed',
+        color: 'rgba(0, 191, 255, 1)',
+        textShadowColor: '#222', 
+        textShadowOffset: { width: .7, height: .7 }, 
+        textShadowRadius: 10,
+        textAlign: 'center',
+        backgroundColor: 'transparent', 
+        backgroundColor: 'darkslateblue',
   },
 });
 

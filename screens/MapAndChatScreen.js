@@ -114,7 +114,7 @@ const MapScreen = ({ route }) => {
         socket.emit('updateLocation', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey });
 
         locationSubscription = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 20 },
+          { accuracy: Location.Accuracy.High, timeInterval: 1000, distanceInterval: 0.1 },
           async (location) => {
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });

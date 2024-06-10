@@ -136,12 +136,15 @@ io.on('connection', (socket) => {
       const user = await User.findById(senderId);
       const newMessage = new Communication({
         senderId,
-        username: user.username, // Add the username
+        username: user.username, 
         message,
         timestamp,
       });
       await newMessage.save();
-      io.to(accessKey).emit('newMessage', newMessage); 
+      io.to(accessKey).emit('newMessage', {
+        ...newMessage.toObject(),
+        username: user.username 
+    });
     } catch (err) {
       console.error('Error sending message:', err);
       socket.emit('error', { message: 'Failed to send message', error: err });

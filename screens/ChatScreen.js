@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, TextInput, Button, FlatList, Keyboard, StyleSheet } from 'react-native';
+import { Text, View, TextInput, Button, FlatList, Keyboard, StyleSheet, Alert } from 'react-native';
 import socketIOClient from 'socket.io-client';
 import { CLOUD_KEY } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,11 +11,14 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [localUserId, setLocalUserId] = useState(null);
   const [accessKey, setAccessKey] = useState(null);
+  const [userName, setUserName] = useState(''); // State to store the username
   const socketRef = useRef(null);
 
   const getSocket = () => {
     if (!socketRef.current) {
-      socketRef.current = socketIOClient(serverKey);
+      socketRef.current = socketIOClient(serverKey, {
+        transports: ['websocket'],
+      });
       socketRef.current.on('connect', () => {
         console.log('Connected to server');
       });
@@ -32,17 +35,19 @@ const ChatScreen = () => {
   };
 
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchUserIdAndUserName = async () => {
       const userId = await AsyncStorage.getItem('userId');
-      if (userId) {
+      const userName = await AsyncStorage.getItem('username'); 
+      if (userId && userName) {
         setLocalUserId(userId);
-        console.log('Local user id:', userId);
+        setUserName(userName);
+        console.log('Local user id:', userId, 'Username:', userName);
       } else {
         setLocalUserId(null);
-        console.log('No local user id');
+        console.log('No local user id or username');
       }
     };
-    fetchUserId();
+    fetchUserIdAndUserName();
   }, []);
 
   useEffect(() => {
@@ -79,6 +84,7 @@ const ChatScreen = () => {
     if (message.trim()) {
       const newMessage = {
         senderId: localUserId,
+        senderName: userName, 
         message,
         accessKey,
         timestamp: new Date(),
@@ -101,10 +107,10 @@ const ChatScreen = () => {
       <FlatList
         data={messages}
         renderItem={({ item }) => (
-          <View style={styles.messageContainer}>
-            <Text style={styles.senderId}>{item.username}</Text>
+            <View style={styles.messageContainer}>
+            <Text style={styles.senderId}>{item.senderName}</Text>
+              <Text style={styles.message}>{item.message}</Text>
             <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
-            <Text style={styles.message}>{item.message}</Text>
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
@@ -133,6 +139,13 @@ const styles = StyleSheet.create({
   },
   senderId: {
     fontWeight: 'bold',
+    color: 'black' 
+  },
+  messageContainer: {
+    marginVertical: 5,
+    padding: 10,
+    backgroundColor: '#f1f1f1', 
+    borderRadius: 5,
   },
   timestamp: {
     fontSize: 12,

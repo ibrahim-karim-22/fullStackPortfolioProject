@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { CLOUD_KEY } from "@env";
-// import * as SecureStore from "expo-secure-store";
+
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -47,14 +47,14 @@ const LoginScreen = ({ navigation }) => {
           console.log("Token:", token);
 
           await AsyncStorage.setItem("userId", user._id);
-          console.log("User ID:", user._id);
+          await AsyncStorage.setItem("username", user.username);
+          console.log("User ID:", user._id, "USERNAME:", user.username);
           if (user._id) {
             const userId = user._id;
             console.log("User ID:", userId);
           } else {
             console.log("No user ID found.");
           }
-
           navigation.navigate("Home");
         } else {
           console.log("Token or user is missing in the response.");

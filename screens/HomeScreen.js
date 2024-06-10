@@ -47,7 +47,7 @@ const HomeScreen = ({ navigation }) => {
     });
 
     socket.on('groupJoined', ({ accessKey }) => {
-      navigation.navigate('TabScreen', { accessKey });
+      navigation.navigate('Group', { accessKey });
     });
 
     socket.on('error', ({ message }) => {
@@ -72,6 +72,47 @@ const HomeScreen = ({ navigation }) => {
     const socket = getSocket();
     socket.emit('joinGroup', { accessKey });
   };
+
+  const handleLogout = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      
+      if (userId) {
+        let response = await fetch(`${serverKey}/locations/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${await AsyncStorage.getItem('authToken')}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error deleting location data');
+        }
+      }
+      await AsyncStorage.clear();
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Logout Error', 'There was an error logging out.');
+    }
+  };
+
+  useEffect(() => {
+    const retrieveAccessKey = async () => {
+      const storedAccessKey = await AsyncStorage.getItem('accessKey');
+      console.log('Retrieved Access Key:', storedAccessKey);
+      if (storedAccessKey) {
+        setAccessKey(storedAccessKey);
+      }
+    };
+
+    retrieveAccessKey();
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -116,6 +157,11 @@ const HomeScreen = ({ navigation }) => {
           <Button title="Close" onPress={() => setIsJoinModalVisible(false)} />
         </View>
       </Modal>
+      <Button
+        title="Logout"
+        onPress={handleLogout}
+        color="red"
+      />
     </ScrollView>
   );
 };

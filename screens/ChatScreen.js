@@ -11,7 +11,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [localUserId, setLocalUserId] = useState(null);
   const [accessKey, setAccessKey] = useState(null);
-  const [userName, setUserName] = useState(''); // State to store the username
+  const [userName, setUserName] = useState(''); 
   const socketRef = useRef(null);
 
   const getSocket = () => {
@@ -84,7 +84,7 @@ const ChatScreen = () => {
     if (message.trim()) {
       const newMessage = {
         senderId: localUserId,
-        senderName: userName, 
+        senderName: userName,
         message,
         accessKey,
         timestamp: new Date(),

@@ -19,13 +19,16 @@ communicationRouter.route('/')
 
 communicationRouter.route('/:userId')
 .get((req, res, next) => {
-  Communication.find({ $or: [{ senderId: req.params.userId }, { receiverId: req.params.userId }] })
+    Communication.find({ senderId: req.params.userId })
     .then(communications => res.status(200).json(communications))
     .catch(err => next(err));
 })
 .delete(authenticate.verifyUser, (req, res, next) => {
-  Communication.deleteMany({ $or: [{ senderId: req.params.userId }, { receiverId: req.params.userId }] })
-    .then(communication => res.status(200).json(communication))
+    Communication.updateMany(
+      { senderId: req.params.userId },
+      { $set: { message: '' } } 
+    )
+    .then(result => res.status(200).json(result))
     .catch(err => next(err));
 });
 

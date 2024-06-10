@@ -1,4 +1,3 @@
-const config = require("../config");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
@@ -10,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Alert
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CLOUD_KEY } from "@env";
 
 
@@ -55,7 +54,7 @@ const LoginScreen = ({ navigation }) => {
           } else {
             console.log("No user ID found.");
           }
-          navigation.navigate("Home");
+          navigation.navigate("Main");
         } else {
           console.log("Token or user is missing in the response.");
           Alert.alert("Error", "An error occurred while logging in.");
@@ -100,7 +99,7 @@ const LoginScreen = ({ navigation }) => {
             onPress={handleLogin}
           />
         </View>
-        {/* </Card> */}
+        {loading && <ActivityIndicator size="large" color="rgba(124, 252, 0, .7)" />}
       </KeyboardAvoidingView>
     </View>
   );

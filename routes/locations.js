@@ -14,7 +14,7 @@ locationRouter
     Location.create(req.body)
       .then(location => res.status(200).json(location))
       .catch(err => next(err));
-  })
+  });
 
 locationRouter
   .route('/:userId')
@@ -25,7 +25,10 @@ locationRouter
   })
 
   .delete(authenticate.verifyUser, (req, res, next) => {
-    Location.deleteMany({ userId: req.params.userId })
+    Location.updateMany(
+      { userId: req.params.userId },
+      { $unset: { coordinates: '' } } 
+    )
       .then(result => res.status(200).json(result))
       .catch(err => next(err));
   });

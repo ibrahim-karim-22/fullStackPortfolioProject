@@ -11,7 +11,7 @@ exports.local = passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-exports.getToken = function(user) {
+exports.getToken = function (user) {
     return jwt.sign({
         _id: user._id,
         username: user.username,
@@ -28,7 +28,7 @@ opts.secretOrKey = SECRET_KEY;
 
 exports.jwtPassport = passport.use(new jwtStrategy(opts, (jwt_payload, done) => {
     console.log("JWT payload: ", jwt_payload);
-    User.findOne({_id: jwt_payload._id}, (err, user) => {
+    User.findOne({ _id: jwt_payload._id }, (err, user) => {
         if (err) {
             return done(err, false);
         }
@@ -41,7 +41,7 @@ exports.jwtPassport = passport.use(new jwtStrategy(opts, (jwt_payload, done) => 
     });
 }));
 
-exports.verifyUser = passport.authenticate('jwt', {session: false});
+exports.verifyUser = passport.authenticate('jwt', { session: false });
 
 exports.hashPassword = async (password) => {
     const salt = await bcrypt.genSalt(10);

@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
+import CustomMarker from './CustomMarker';
 
 const serverKey = CLOUD_KEY;
 
@@ -28,28 +29,37 @@ const MapScreen = ({ route }) => {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [userLocations, setUserLocations] = useState({});
   const [localUserId, setLocalUserId] = useState(null);
-  const [groupName, setGroupName] = useState(null); 
+  const [username, setUsername] = useState(null);
+  const [groupName, setGroupName] = useState(null);
 
   useEffect(() => {
-      const fetchUserData = async () => {
-        const userId = await AsyncStorage.getItem('userId');
-        const groupName = await AsyncStorage.getItem('groupName');
-        setLocalUserId(userId);
-        setGroupName(groupName);
-        console.log('Local user id:', userId);
-        console.log('Group name:', groupName);
-      };
-      fetchUserData();
-    }, []);
+    const fetchUserData = async () => {
+      const userId = await AsyncStorage.getItem('userId');
+      const username = await AsyncStorage.getItem('username');
+      const groupName = await AsyncStorage.getItem('groupName');
+      setLocalUserId(userId);
+      setUsername(username);
+      setGroupName(groupName);
+      console.log('Local user id:', userId);
+      console.log('Username:', username);
+      console.log('Group name:', groupName);
+    };
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
-    const socket = getSocket();
-    AsyncStorage.getItem('accessKey').then(accessKey => {
-      socket.emit('joinGroup', { accessKey });
-    });
+    const joinGroupWithUsername = async () => {
+      const socket = getSocket();
+      const accessKey = await AsyncStorage.getItem('accessKey');
+      if (accessKey && localUserId && username) {
+        socket.emit('joinGroup', { accessKey, userId: localUserId, username });
+      }
+    };
+
+    joinGroupWithUsername();
 
     socket.on('groupJoined', ({ groupName }) => {
-      console.log('Group Joined:', groupName); 
+      console.log('Group Joined:', groupName);
     });
 
     socket.on('error', ({ message }) => {
@@ -60,7 +70,10 @@ const MapScreen = ({ route }) => {
       console.log('Received location update:', data);
       setUserLocations(prevLocations => ({
         ...prevLocations,
-        [data.userId]: data.coordinates,
+        [data.userId]: {
+          coordinates: data.coordinates,
+          username: data.username,
+        },
       }));
     });
 
@@ -68,7 +81,7 @@ const MapScreen = ({ route }) => {
       socket.off('locationUpdated');
       socket.off('groupJoined');
     };
-  }, []);
+  }, [localUserId, username]);
 
   const getLocationFromDevice = async () => {
     try {
@@ -96,22 +109,23 @@ const MapScreen = ({ route }) => {
       if (location) {
         setCurrentLocation(location);
         const socket = getSocket();
-        console.log('Emitting location event', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
-        socket.emit('updateLocation', { userId: localUserId, coordinates: [location.latitude, location.longitude] });
+        const accessKey = await AsyncStorage.getItem('accessKey');
+        console.log('Emitting location event', { userId: localUserId, username, coordinates: [location.latitude, location.longitude] });
+        socket.emit('updateLocation', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey });
 
         locationSubscription = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 20 },
-          (location) => {
+          async (location) => {
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });
-            console.log('Emitting location update', { userId: localUserId, coordinates: [latitude, longitude] });
-            socket.emit('updateLocation', { userId: localUserId, coordinates: [latitude, longitude] });
+            console.log('Emitting location update', { userId: localUserId, username, coordinates: [latitude, longitude] });
+            socket.emit('updateLocation', { userId: localUserId, username, coordinates: [latitude, longitude], accessKey });
           }
         );
       }
     };
 
-    if (localUserId) {
+    if (localUserId && username) {
       fetchLocation();
     }
 
@@ -120,7 +134,7 @@ const MapScreen = ({ route }) => {
         locationSubscription.remove();
       }
     };
-  }, [localUserId]);
+  }, [localUserId, username]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -134,23 +148,21 @@ const MapScreen = ({ route }) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}>
-          <Marker
+          <CustomMarker
             coordinate={{
               latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
             }}
-            title="My Location"
-            description="My first tracked location"
+            username={username}
           />
           {Object.keys(userLocations).map(key => (
-            <Marker
+            <CustomMarker
               key={key}
               coordinate={{
-                latitude: userLocations[key][0],
-                longitude: userLocations[key][1],
+                latitude: userLocations[key].coordinates[0],
+                longitude: userLocations[key].coordinates[1],
               }}
-              title={`User ${key}`}
-              description={`Location of user ${key}`}
+              username={userLocations[key].username}
             />
           ))}
         </MapView>
@@ -164,14 +176,13 @@ const MapScreen = ({ route }) => {
 const styles = StyleSheet.create({
   groupInfo: {
     fontSize: 22,
-        fontFamily: 'sans-serif-condensed',
-        color: 'rgba(0, 191, 255, 1)',
-        textShadowColor: '#222', 
-        textShadowOffset: { width: .7, height: .7 }, 
-        textShadowRadius: 10,
-        textAlign: 'center',
-        backgroundColor: 'transparent', 
-        backgroundColor: 'darkslateblue',
+    fontFamily: 'sans-serif-condensed',
+    color: 'rgba(0, 191, 255, 1)',
+    textShadowColor: '#222',
+    textShadowOffset: { width: .7, height: .7 },
+    textShadowRadius: 10,
+    textAlign: 'center',
+    backgroundColor: 'royalblue',
   },
 });
 

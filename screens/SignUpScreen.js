@@ -13,7 +13,6 @@ import {
 import { Card } from 'react-native-elements';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-const config = require('../config');
 import { CLOUD_KEY } from '@env'
 
 const SignUpScreen = () => {
@@ -26,16 +25,16 @@ const SignUpScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const btnY = useRef(new Animated.Value(500)).current;
-  
+
   useEffect(() => {
-      Animated.stagger(100, [
-        Animated.timing(btnY, {
-          toValue: 0,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, [btnY]);
+    Animated.stagger(100, [
+      Animated.timing(btnY, {
+        toValue: 0,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [btnY]);
 
 
   const handleSignUp = async () => {
@@ -71,54 +70,54 @@ const SignUpScreen = () => {
   return (
     <View style={styles.mainContainer}>
       <KeyboardAvoidingView behavior="padding">
-      <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
-        <Card containerStyle={styles.card}>
-          <TextInput
-            style={styles.input}
-            placeholder="First Name"
-            value={firstname}
-            onChangeText={setFirstname}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Last Name"
-            value={lastname}
-            onChangeText={setLastname}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            autoCapitalize="none"
-            onChangeText={setEmail}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            autoCapitalize="none"
-            onChangeText={setPassword}
-            secureTextEntry={true}
-          />
-          {loading ? (
-            <ActivityIndicator size="large" color="steelblue" />
-          ) : (
-            <>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => handleSignUp()}
-              >
-                <Text style={styles.buttonText}>Sign Up</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </Card>
+        <Animated.View style={[{ transform: [{ translateY: btnY }] }]}>
+          <Card containerStyle={styles.card}>
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              value={firstname}
+              onChangeText={setFirstname}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              value={lastname}
+              onChangeText={setLastname}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              value={username}
+              onChangeText={setUsername}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              autoCapitalize="none"
+              onChangeText={setEmail}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              autoCapitalize="none"
+              onChangeText={setPassword}
+              secureTextEntry={true}
+            />
+            {loading ? (
+              <ActivityIndicator size="large" color="steelblue" />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={styles.btn}
+                  onPress={() => handleSignUp()}
+                >
+                  <Text style={styles.buttonText}>Sign Up</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </Card>
         </Animated.View>
       </KeyboardAvoidingView>
     </View>

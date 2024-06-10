@@ -1,8 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, Platform } from 'react-native';
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faHouseFlag } from '@fortawesome/free-solid-svg-icons';
+import { StyleSheet, View, Platform } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import LoginScreen from '../screens/LoginScreen';

@@ -106,7 +106,7 @@ io.on('connection', (socket) => {
           await group.save();
         }
         socket.join(accessKey);
-        socket.emit('groupJoined', { groupName: group.groupName }); 
+        socket.emit('groupJoined', { groupName: group.groupName });
       } else {
         socket.emit('error', { message: 'Group not found' });
       }
@@ -136,21 +136,21 @@ io.on('connection', (socket) => {
       const user = await User.findById(senderId);
       const newMessage = new Communication({
         senderId,
-        username: user.username, 
+        username: user.username,
         message,
         timestamp,
       });
       await newMessage.save();
       io.to(accessKey).emit('newMessage', {
         ...newMessage.toObject(),
-        username: user.username 
-    });
+        username: user.username
+      });
     } catch (err) {
       console.error('Error sending message:', err);
       socket.emit('error', { message: 'Failed to send message', error: err });
     }
   });
-  
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });

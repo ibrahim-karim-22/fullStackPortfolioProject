@@ -2,20 +2,18 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Alert,
   TouchableOpacity,
   Animated
-  } from "react-native";
-  import { useEffect, useRef } from "react";
-  import { Card } from 'react-native-elements';
-  import AsyncStorage from "@react-native-async-storage/async-storage";
+} from "react-native";
+import { useEffect, useRef } from "react";
+import { Card } from 'react-native-elements';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { CLOUD_KEY } from "@env";
-
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -23,18 +21,16 @@ const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const btnY = useRef(new Animated.Value(500)).current;
-  
-    useEffect(() => {
-        Animated.stagger(100, [
-          Animated.timing(btnY, {
-            toValue: 0,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }, [btnY]);
 
-
+  useEffect(() => {
+    Animated.stagger(100, [
+      Animated.timing(btnY, {
+        toValue: 0,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [btnY]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -77,11 +73,11 @@ const LoginScreen = ({ navigation }) => {
           Alert.alert("Error", "An error occurred while logging in.");
         }
       } else {
-        const errorData = await response.json(); 
+        const errorData = await response.json();
         console.log("Error response data:", errorData);
         Alert.alert("Error", errorData.message || "An error occurred while logging in.");
       }
-      
+
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "An error occured while logging in.");
@@ -93,32 +89,32 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.mainContainer}>
       <KeyboardAvoidingView behavior="padding">
-      <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
-        <Card containerStyle={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="username"
-          value={username}
-          autoCapitalize="none"
-          onChangeText={setUsername}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          autoCapitalize="none"
-          onChangeText={setPassword}
-          secureTextEntry={true}
-        />
-        <TouchableOpacity
-                style={styles.btn}
-                onPress={() => handleLogin()}
-                color={"rgba(124, 252, 0, .7)"}
+        <Animated.View style={[{ transform: [{ translateY: btnY }] }]}>
+          <Card containerStyle={styles.card}>
+            <TextInput
+              style={styles.input}
+              placeholder="username"
+              value={username}
+              autoCapitalize="none"
+              onChangeText={setUsername}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              autoCapitalize="none"
+              onChangeText={setPassword}
+              secureTextEntry={true}
+            />
+            <TouchableOpacity
+              style={styles.btn}
+              onPress={() => handleLogin()}
+              color={"rgba(124, 252, 0, .7)"}
             >
-                <Text style={styles.buttonText}>Login</Text>
+              <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-        {loading && <ActivityIndicator size="large" color="rgba(124, 252, 0, .7)" />}
-        </Card>
+            {loading && <ActivityIndicator size="large" color="rgba(124, 252, 0, .7)" />}
+          </Card>
         </Animated.View>
       </KeyboardAvoidingView>
     </View>
@@ -140,7 +136,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.7,
     shadowRadius: 10,
     elevation: 8,
-    // alignSelf: 'center',
     alignItems: 'center',
   },
   title: {
@@ -178,18 +173,18 @@ const styles = StyleSheet.create({
     elevation: 9,
     width: 200,
     alignSelf: 'center',
-},
-buttonText: {
+  },
+  buttonText: {
     fontSize: 18,
     color: 'snow',
     fontWeight: 'bold',
     fontFamily: 'sans-serif-condensed',
     textAlign: 'center',
-    textShadowColor: '#222', 
-    textShadowOffset: { width: .7, height: .7 }, 
+    textShadowColor: '#222',
+    textShadowOffset: { width: .7, height: .7 },
     textShadowRadius: 1,
     fontSize: 22
-},
+  },
 });
 
 export default LoginScreen;

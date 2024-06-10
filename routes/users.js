@@ -41,31 +41,31 @@ userRouter
     const token = authenticate.getToken({ _id: req.user._id });
     try {
       const user = await User.findById(req.user._id);
-        if (!user) {
-          return res.status(404).json({ success: false, message: 'User not found!' });
-        }
-        console.log('user found:', user);
-
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({
-          success: true,
-          token: token,
-          user: {
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            firstname: user.firstname,
-            lastname: user.lastname
-          },
-          status: 'You are successfully logged in!',
-        });
-    } catch (err) {
-        console.error('error fetching user:', err);
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({ success: false, message: 'error getting user info' })
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found!' });
       }
+      console.log('user found:', user);
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({
+        success: true,
+        token: token,
+        user: {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          firstname: user.firstname,
+          lastname: user.lastname
+        },
+        status: 'You are successfully logged in!',
+      });
+    } catch (err) {
+      console.error('error fetching user:', err);
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({ success: false, message: 'error getting user info' })
+    }
   });
 
 userRouter

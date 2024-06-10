@@ -4,14 +4,12 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   Modal,
   TextInput,
   Alert,
   TouchableOpacity,
   Animated
 } from 'react-native';
-
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
@@ -131,23 +129,23 @@ const HomeScreen = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
-      <TouchableOpacity
-        style={styles.createBtn}
-        onPress={() => setIsCreateModalVisible(true)}
-        color={"rgba(124, 252, 0, .7)"}
-      >
-        <Text style={styles.buttonText}>Create Group</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.createBtn}
+          onPress={() => setIsCreateModalVisible(true)}
+          color={"rgba(124, 252, 0, .7)"}
+        >
+          <Text style={styles.buttonText}>Create Group</Text>
+        </TouchableOpacity>
       </Animated.View>
 
       <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
-      <TouchableOpacity
-        style={styles.joinBtn}
-        onPress={() => setIsJoinModalVisible(true)}
-        color={"rgba(124, 252, 0, .7)"}
-      >
-        <Text style={styles.buttonText}>Join Group</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.joinBtn}
+          onPress={() => setIsJoinModalVisible(true)}
+          color={"rgba(124, 252, 0, .7)"}
+        >
+          <Text style={styles.buttonText}>Join Group</Text>
+        </TouchableOpacity>
       </Animated.View>
       <Modal visible={isCreateModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
@@ -204,12 +202,12 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </Modal>
       <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
-      <TouchableOpacity
-        style={styles.logoutBtn}
-        onPress={handleLogout}
-      >
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={handleLogout}
+        >
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
       </Animated.View>
     </ScrollView>
   );
@@ -340,7 +338,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 1,
   },
   disabledButton: {
-    backgroundColor: '#B0C4DE', 
+    backgroundColor: '#B0C4DE',
   },
 });
 

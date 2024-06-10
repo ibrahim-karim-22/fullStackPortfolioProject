@@ -1,42 +1,40 @@
-import { useEffect, useState, useRef } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-
-
+import { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 const WelcomeScreen = ({ navigation }) => {
     const btnY = useRef(new Animated.Value(500)).current;
-  
+
 
     useEffect(() => {
         Animated.stagger(100, [
-          Animated.timing(btnY, {
-            toValue: 0,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
+            Animated.timing(btnY, {
+                toValue: 0,
+                duration: 2000,
+                useNativeDriver: true,
+            }),
         ]).start();
-      }, [btnY]);
+    }, [btnY]);
 
     return (
         <View style={styles.container}>
-            <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
-            <Text style={styles.title}>HeyYou</Text>
+            <Animated.View style={[{ transform: [{ translateY: btnY }] }]}>
+                <Text style={styles.title}>HeyYou</Text>
             </Animated.View>
-            <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
-            <TouchableOpacity
-                style={styles.loginBtn}
-                onPress={() => navigation.navigate('Login')}
-            >
-                <Text style={styles.buttonText}>Login</Text>
-            </TouchableOpacity>
+            <Animated.View style={[{ transform: [{ translateY: btnY }] }]}>
+                <TouchableOpacity
+                    style={styles.loginBtn}
+                    onPress={() => navigation.navigate('Login')}
+                >
+                    <Text style={styles.buttonText}>Login</Text>
+                </TouchableOpacity>
             </Animated.View>
-            <Animated.View style={[ { transform: [{ translateY: btnY }] }]}>
-            <TouchableOpacity
-                style={styles.signUpBtn}
-                onPress={() => navigation.navigate('SignUp')}
-                color={"rgba(124, 252, 0, .7)"}
-            >
-                <Text style={styles.buttonText}>Sign Up</Text>
-            </TouchableOpacity>
+            <Animated.View style={[{ transform: [{ translateY: btnY }] }]}>
+                <TouchableOpacity
+                    style={styles.signUpBtn}
+                    onPress={() => navigation.navigate('SignUp')}
+                    color={"rgba(124, 252, 0, .7)"}
+                >
+                    <Text style={styles.buttonText}>Sign Up</Text>
+                </TouchableOpacity>
             </Animated.View>
         </View>
     );
@@ -54,11 +52,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontFamily: 'sans-serif-condensed',
         color: 'rgba(0, 191, 255, 1)',
-        textShadowColor: '#222', 
-        textShadowOffset: { width: .7, height: .7 }, 
+        textShadowColor: '#222',
+        textShadowOffset: { width: .7, height: .7 },
         textShadowRadius: 10,
         textAlign: 'center',
-        padding: 10 
+        padding: 10
     },
     btnContainer: {
         marginTop: 20,
@@ -95,8 +93,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontFamily: 'sans-serif-condensed',
         textAlign: 'center',
-        textShadowColor: '#222', 
-        textShadowOffset: { width: .7, height: .7 }, 
+        textShadowColor: '#222',
+        textShadowOffset: { width: .7, height: .7 },
         textShadowRadius: 1,
         fontSize: 22
     },

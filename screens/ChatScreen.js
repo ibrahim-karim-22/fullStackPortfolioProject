@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Text, View, TextInput, Button, FlatList, Keyboard, StyleSheet, Alert } from 'react-native';
+import { Text, View, TextInput, FlatList, Keyboard, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import socketIOClient from 'socket.io-client';
 import { CLOUD_KEY } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -121,7 +121,9 @@ const ChatScreen = () => {
         onChangeText={setMessage}
         placeholder="Type your message..."
       />
-      <Button title="Send" onPress={handleSendMessage} />
+      <TouchableOpacity style={styles.btn} onPress={handleSendMessage}>
+      <Text style={styles.buttonText}>Send</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -130,35 +132,59 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: 'aliceblue',
   },
   messageContainer: {
     marginVertical: 5,
     padding: 10,
-    backgroundColor: '#f1f1f1',
+    backgroundColor: 'deepskyblue',
     borderRadius: 5,
   },
   senderId: {
     fontWeight: 'bold',
-    color: 'black' 
+    color: 'snow',
+    fontFamily: 'monospace', 
   },
   messageContainer: {
     marginVertical: 5,
     padding: 10,
-    backgroundColor: '#f1f1f1', 
+    backgroundColor: 'deepskyblue', 
     borderRadius: 5,
   },
   timestamp: {
     fontSize: 12,
-    color: '#888',
+    color: 'gold',
   },
   message: {
     fontSize: 16,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
+    backgroundColor: 'honeydew',
+    fontSize: 22,
+    padding: 11,
+    margin: 11,
+    borderRadius: 2,
+    shadowColor: 'black',
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 3,
+    elevation: 8,
+    width: 300,
+    alignSelf: 'center',
+  },
+  btn: {
+    backgroundColor: 'rgba(124,252,0,1)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 9,
+    width: 200,
+    alignItems: 'center',
+    alignSelf: 'center',
   },
 });
 

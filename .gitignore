@@ -43,7 +43,8 @@ local.properties
 .eas.json
 .env*
 config.js
-
+eas.json
+app.json
 # node.js
 #
 node_modules/

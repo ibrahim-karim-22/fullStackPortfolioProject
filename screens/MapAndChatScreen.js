@@ -141,6 +141,7 @@ const MapScreen = ({ route }) => {
       <Text style={styles.groupInfo}>{groupName}</Text>
       {currentLocation ? (
         <MapView
+          provider="google"
           style={{ flex: 1 }}
           initialRegion={{
             latitude: currentLocation.latitude,

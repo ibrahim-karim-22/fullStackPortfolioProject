@@ -94,7 +94,7 @@ const MapAndChatScreen = ({ localUserId, accessKey, username }) => {
       const location = await getLocationFromDevice();
       if (location) {
         setCurrentLocation(location);
-        const storedAccessKey = await AsyncStorage.getItem('accessKey'); // Retrieve accessKey from AsyncStorage
+        const storedAccessKey = await AsyncStorage.getItem('accessKey'); 
         const socket = getSocket();
         console.log('Emitting location event', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey: storedAccessKey });
         socket.emit('updateLocation', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey: storedAccessKey });

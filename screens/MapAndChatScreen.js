@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Alert, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView from 'react-native-maps';
 import * as Location from 'expo-location';
 import socketIOClient from 'socket.io-client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CLOUD_KEY } from '@env';
 import CustomMarker from './CustomMarker';
+import { CLOUD_KEY } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const serverKey = CLOUD_KEY;
 
@@ -25,38 +25,12 @@ const getSocket = () => {
   return socket;
 };
 
-const MapScreen = ({ route }) => {
+const MapAndChatScreen = ({ localUserId, accessKey, username }) => {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [userLocations, setUserLocations] = useState({});
-  const [localUserId, setLocalUserId] = useState(null);
-  const [username, setUsername] = useState(null);
-  const [groupName, setGroupName] = useState(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userId = await AsyncStorage.getItem('userId');
-      const username = await AsyncStorage.getItem('username');
-      const groupName = await AsyncStorage.getItem('groupName');
-      setLocalUserId(userId);
-      setUsername(username);
-      setGroupName(groupName);
-      console.log('Local user id:', userId);
-      console.log('Username:', username);
-      console.log('Group name:', groupName);
-    };
-    fetchUserData();
-  }, []);
-
-  useEffect(() => {
-    const joinGroupWithUsername = async () => {
-      const socket = getSocket();
-      const accessKey = await AsyncStorage.getItem('accessKey');
-      if (accessKey && localUserId && username) {
-        socket.emit('joinGroup', { accessKey, userId: localUserId, username });
-      }
-    };
-
-    joinGroupWithUsername();
+    const socket = getSocket();
 
     socket.on('groupJoined', ({ groupName }) => {
       console.log('Group Joined:', groupName);
@@ -66,13 +40,13 @@ const MapScreen = ({ route }) => {
       Alert.alert('Error', message);
     });
 
-    socket.on('locationUpdated', data => {
-      console.log('Received location update:', data);
+    socket.on('locationUpdated', ({ userId, coordinates, username }) => {
+      console.log('Received location update:', { userId, coordinates, username });
       setUserLocations(prevLocations => ({
         ...prevLocations,
-        [data.userId]: {
-          coordinates: data.coordinates,
-          username: data.username,
+        [userId]: {
+          coordinates,
+          username,
         },
       }));
     });
@@ -82,6 +56,18 @@ const MapScreen = ({ route }) => {
       socket.off('groupJoined');
     };
   }, [localUserId, username]);
+
+  useEffect(() => {
+    const joinGroup = async () => {
+      const storedAccessKey = await AsyncStorage.getItem('accessKey');
+      if (storedAccessKey && localUserId && username) {
+      const socket = getSocket();
+        console.log('Joining Group', { accessKey: storedAccessKey, userId: localUserId, username });
+        socket.emit('joinGroup', { accessKey: storedAccessKey, userId: localUserId, username });
+    }
+    };
+    joinGroup();
+  }, [accessKey, localUserId, username]);
 
   const getLocationFromDevice = async () => {
     try {
@@ -108,18 +94,18 @@ const MapScreen = ({ route }) => {
       const location = await getLocationFromDevice();
       if (location) {
         setCurrentLocation(location);
+        const storedAccessKey = await AsyncStorage.getItem('accessKey'); // Retrieve accessKey from AsyncStorage
         const socket = getSocket();
-        const accessKey = await AsyncStorage.getItem('accessKey');
-        console.log('Emitting location event', { userId: localUserId, username, coordinates: [location.latitude, location.longitude] });
-        socket.emit('updateLocation', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey });
+        console.log('Emitting location event', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey: storedAccessKey });
+        socket.emit('updateLocation', { userId: localUserId, username, coordinates: [location.latitude, location.longitude], accessKey: storedAccessKey });
 
         locationSubscription = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.High, timeInterval: 1000, distanceInterval: 0.1 },
           async (location) => {
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });
-            console.log('Emitting location update', { userId: localUserId, username, coordinates: [latitude, longitude] });
-            socket.emit('updateLocation', { userId: localUserId, username, coordinates: [latitude, longitude], accessKey });
+            console.log('Emitting location update', { userId: localUserId, username, coordinates: [latitude, longitude], accessKey: storedAccessKey });
+            socket.emit('updateLocation', { userId: localUserId, username, coordinates: [latitude, longitude], accessKey: storedAccessKey });
           }
         );
       }
@@ -138,7 +124,6 @@ const MapScreen = ({ route }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={styles.groupInfo}>{groupName}</Text>
       {currentLocation ? (
         <MapView
           provider="google"
@@ -187,4 +172,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MapScreen;
+export default MapAndChatScreen;

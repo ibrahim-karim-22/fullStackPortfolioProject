@@ -1,15 +1,6 @@
+import React from 'react';
 import { useEffect, useState, useRef } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Modal,
-  TextInput,
-  Alert,
-  TouchableOpacity,
-  Animated
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Modal, TextInput, Alert, TouchableOpacity, Animated } from 'react-native';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CLOUD_KEY } from '@env';
@@ -23,7 +14,6 @@ const getSocket = () => {
     socket.on('connect', () => {
       console.log('Connected to server');
     });
-
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
     });
@@ -52,17 +42,22 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const socket = getSocket();
 
-    socket.on('groupCreated', ({ accessKey }) => {
+    socket.on('groupCreated', async ({ accessKey, userId, username }) => {
       setAccessKey(accessKey);
-      AsyncStorage.setItem('accessKey', accessKey);
-      Alert.alert('Group Created', `Access key: ${accessKey}`);
+      await AsyncStorage.setItem('accessKey', accessKey);
+      console.log('Group Created', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}`);
+      Alert.alert('Group Created', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}`);
     });
 
-    socket.on('groupJoined', ({ accessKey }) => {
-      navigation.navigate('Group', { accessKey });
+    socket.on('groupJoined', async ({ accessKey, userId, username, groupName }) => {
+      await AsyncStorage.setItem('accessKey', accessKey);
+      console.log('Group Joined', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}, Group Name: ${groupName}`);
+      Alert.alert('Group Joined', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}, Group Name: ${groupName}`);
+      navigation.navigate('Group');  
     });
 
     socket.on('error', ({ message }) => {
+      console.error('Socket Error:', message);
       Alert.alert('Error', message);
     });
 
@@ -73,16 +68,32 @@ const HomeScreen = ({ navigation }) => {
     };
   }, [navigation]);
 
-  const createGroup = () => {
+  const createGroup = async () => {
     const socket = getSocket();
+    const userId = await AsyncStorage.getItem('userId');
+    const username = await AsyncStorage.getItem('username');
+    console.log('Creating Group', { groupName, userId, username });
 
-    AsyncStorage.setItem('groupName', groupName);
-    socket.emit('createGroup', { groupName });
+    if (userId && username) {
+      await AsyncStorage.setItem('groupName', groupName);
+      socket.emit('createGroup', { groupName, userId, username });
+    } else {
+      Alert.alert('Error', 'happened in createGroup.');
+    }
   };
 
-  const joinGroup = (accessKey) => {
+  const joinGroup = async (accessKey) => {
     const socket = getSocket();
-    socket.emit('joinGroup', { accessKey });
+    const userId = await AsyncStorage.getItem('userId');
+    const username = await AsyncStorage.getItem('username');
+    console.log('Joining Group', { accessKey, userId, username });
+
+    if (userId && username) {
+    await AsyncStorage.setItem('accessKey', accessKey); 
+      socket.emit('joinGroup', { accessKey, userId, username });
+    } else {
+      Alert.alert('Error', 'happened in joinGroup.');
+    }
   };
 
   const handleLogout = async () => {
@@ -117,9 +128,10 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const retrieveAccessKey = async () => {
       const storedAccessKey = await AsyncStorage.getItem('accessKey');
-      console.log('Retrieved Access Key:', storedAccessKey);
       if (storedAccessKey) {
         setAccessKey(storedAccessKey);
+      } else {
+        setAccessKey('');  
       }
     };
 
@@ -131,7 +143,10 @@ const HomeScreen = ({ navigation }) => {
       <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
         <TouchableOpacity
           style={styles.createBtn}
-          onPress={() => setIsCreateModalVisible(true)}
+          onPress={() => {
+            setAccessKey(''); 
+            setIsCreateModalVisible(true);
+          }}
           color={"rgba(124, 252, 0, .7)"}
         >
           <Text style={styles.buttonText}>Create Group</Text>

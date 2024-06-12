@@ -2,25 +2,25 @@ import { useState, useEffect, useRef } from 'react';
 import { Text, View, TextInput, FlatList, Keyboard, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import socketIOClient from 'socket.io-client';
 import { CLOUD_KEY } from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const serverKey = CLOUD_KEY;
 
-const ChatScreen = () => {
+const ChatScreen = ({ localUserId, accessKey, username }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [localUserId, setLocalUserId] = useState(null);
-  const [accessKey, setAccessKey] = useState(null);
-  const [userName, setUserName] = useState(''); 
   const socketRef = useRef(null);
 
   const getSocket = () => {
     if (!socketRef.current) {
-      socketRef.current = socketIOClient(serverKey, {
+      socketRef.current = socketIOClient(CLOUD_KEY, {
         transports: ['websocket'],
       });
       socketRef.current.on('connect', () => {
         console.log('Connected to server');
+        if (accessKey && localUserId && username) {
+          console.log('Joining Group', { accessKey, userId: localUserId, username });
+          socketRef.current.emit('joinGroup', { accessKey, userId: localUserId, username });
+        }
       });
 
       socketRef.current.on('disconnect', () => {
@@ -28,42 +28,30 @@ const ChatScreen = () => {
       });
 
       socketRef.current.on('newMessage', (msg) => {
+        if (msg.senderId !== localUserId) {
         setMessages((prevMessages) => [...prevMessages, msg]);
+        }
       });
     }
     return socketRef.current;
   };
 
   useEffect(() => {
-    const fetchUserIdAndUserName = async () => {
-      const userId = await AsyncStorage.getItem('userId');
-      const userName = await AsyncStorage.getItem('username'); 
-      if (userId && userName) {
-        setLocalUserId(userId);
-        setUserName(userName);
-        console.log('Local user id:', userId, 'Username:', userName);
-      } else {
-        setLocalUserId(null);
-        console.log('No local user id or username');
-      }
-    };
-    fetchUserIdAndUserName();
-  }, []);
-
-  useEffect(() => {
-    const fetchAccessKey = async () => {
-      const storedAccessKey = await AsyncStorage.getItem('accessKey');
-      if (storedAccessKey) {
-        setAccessKey(storedAccessKey);
-        const socket = getSocket();
-        if (localUserId) {
-          socket.emit('joinGroup', { accessKey: storedAccessKey, userId: localUserId });
+    const fetchMessages = async () => {
+      try {
+        if (accessKey) {
+          const response = await fetch(`${CLOUD_KEY}/communication/byAccessKey/${accessKey}`);
+          const data = await response.json();
+          setMessages(data);
         }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
       }
     };
-    fetchAccessKey();
+    fetchMessages();
 
     const socket = getSocket();
+
     socket.on('groupJoined', ({ groupName }) => {
       console.log('Group Joined:', groupName);
     });
@@ -73,18 +61,15 @@ const ChatScreen = () => {
     });
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.off('newMessage');
-        socketRef.current.off('groupJoined');
-      }
+      socket.disconnect();
     };
-  }, [localUserId]);
+  }, [accessKey, localUserId, username]);
 
   const handleSendMessage = () => {
     if (message.trim()) {
       const newMessage = {
         senderId: localUserId,
-        senderName: userName,
+        senderName: username,
         message,
         accessKey,
         timestamp: new Date(),
@@ -145,18 +130,12 @@ const styles = StyleSheet.create({
     color: 'snow',
     fontFamily: 'monospace', 
   },
-  messageContainer: {
-    marginVertical: 5,
-    padding: 10,
-    backgroundColor: 'deepskyblue', 
-    borderRadius: 5,
+  message: {
+    fontSize: 16,
   },
   timestamp: {
     fontSize: 12,
     color: 'gold',
-  },
-  message: {
-    fontSize: 16,
   },
   input: {
     backgroundColor: 'honeydew',
@@ -185,6 +164,13 @@ const styles = StyleSheet.create({
     width: 200,
     alignItems: 'center',
     alignSelf: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'snow',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif-condensed',
+    textAlign: 'center',
   },
 });
 

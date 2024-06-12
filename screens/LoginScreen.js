@@ -1,18 +1,7 @@
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Alert,
-  TouchableOpacity,
-  Animated
-} from "react-native";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Alert, TouchableOpacity, Animated } from "react-native";
 import { Card } from 'react-native-elements';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
 import { CLOUD_KEY } from "@env";
 
 const LoginScreen = ({ navigation }) => {
@@ -33,6 +22,10 @@ const LoginScreen = ({ navigation }) => {
   }, [btnY]);
 
   const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Error", "Username and password cannot be empty.");
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch(CLOUD_KEY + `/users/login`, {
@@ -108,7 +101,7 @@ const LoginScreen = ({ navigation }) => {
             />
             <TouchableOpacity
               style={styles.btn}
-              onPress={() => handleLogin()}
+              onPress={handleLogin}
               color={"rgba(124, 252, 0, .7)"}
             >
               <Text style={styles.buttonText}>Login</Text>

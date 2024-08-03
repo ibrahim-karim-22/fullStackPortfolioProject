@@ -1,6 +1,6 @@
 const express = require('express');
 const locationRouter = express.Router();
-const Location = require('../models/locationSchema')
+const Location = require('../models/locationSchema');
 const authenticate = require('../authenticate');
 
 locationRouter
@@ -19,15 +19,15 @@ locationRouter
 locationRouter
   .route('/:userId')
   .get((req, res, next) => {
-    Location.find({ userId: req.params.userId })
+    Location.find({userId: req.params.userId})
       .then(locations => res.status(200).json(locations))
       .catch(err => next(err));
   })
 
   .delete(authenticate.verifyUser, (req, res, next) => {
     Location.updateMany(
-      { userId: req.params.userId },
-      { $unset: { coordinates: '' } }
+      {userId: req.params.userId},
+      {$unset: {coordinates: ''}},
     )
       .then(result => res.status(200).json(result))
       .catch(err => next(err));

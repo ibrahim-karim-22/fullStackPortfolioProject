@@ -5,26 +5,26 @@ const locationSchema = new Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'User'
+    ref: 'User',
   },
   coordinates: {
     type: {
       type: String,
       enum: ['Point'],
-      default: 'Point'
+      default: 'Point',
     },
     coordinates: {
       type: [Number],
-      required: true
-    }
+      required: true,
+    },
   },
   timestamp: {
     type: Date,
-    default: Date.now
-  }
-})
+    default: Date.now,
+  },
+});
 
-locationSchema.index({ coordinates: '2dsphere' });
+locationSchema.index({coordinates: '2dsphere'});
 
 const Location = mongoose.model('Location', locationSchema);
 

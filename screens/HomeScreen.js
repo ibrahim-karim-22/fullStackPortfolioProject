@@ -1,9 +1,19 @@
 import React from 'react';
-import { useEffect, useState, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, View, Modal, TextInput, Alert, TouchableOpacity, Animated } from 'react-native';
+import {useEffect, useState, useRef} from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Modal,
+  TextInput,
+  Alert,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import socketIOClient from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CLOUD_KEY } from '@env';
+import {CLOUD_KEY} from '@env';
 
 const serverKey = CLOUD_KEY;
 let socket;
@@ -21,7 +31,7 @@ const getSocket = () => {
   return socket;
 };
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({navigation}) => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
   const [accessKey, setAccessKey] = useState('');
@@ -42,21 +52,36 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const socket = getSocket();
 
-    socket.on('groupCreated', async ({ accessKey, userId, username }) => {
+    socket.on('groupCreated', async ({accessKey, userId, username}) => {
       setAccessKey(accessKey);
       await AsyncStorage.setItem('accessKey', accessKey);
-      console.log('Group Created', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}`);
-      Alert.alert('Group Created', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}`);
+      console.log(
+        'Group Created',
+        `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}`,
+      );
+      Alert.alert(
+        'Group Created',
+        `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}`,
+      );
     });
 
-    socket.on('groupJoined', async ({ accessKey, userId, username, groupName }) => {
-      await AsyncStorage.setItem('accessKey', accessKey);
-      console.log('Group Joined', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}, Group Name: ${groupName}`);
-      Alert.alert('Group Joined', `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}, Group Name: ${groupName}`);
-      navigation.navigate('Group');  
-    });
+    socket.on(
+      'groupJoined',
+      async ({accessKey, userId, username, groupName}) => {
+        await AsyncStorage.setItem('accessKey', accessKey);
+        console.log(
+          'Group Joined',
+          `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}, Group Name: ${groupName}`,
+        );
+        Alert.alert(
+          'Group Joined',
+          `Access key: ${accessKey}, User ID: ${userId}, Username: ${username}, Group Name: ${groupName}`,
+        );
+        navigation.navigate('Group');
+      },
+    );
 
-    socket.on('error', ({ message }) => {
+    socket.on('error', ({message}) => {
       console.error('Socket Error:', message);
       Alert.alert('Error', message);
     });
@@ -72,25 +97,25 @@ const HomeScreen = ({ navigation }) => {
     const socket = getSocket();
     const userId = await AsyncStorage.getItem('userId');
     const username = await AsyncStorage.getItem('username');
-    console.log('Creating Group', { groupName, userId, username });
+    console.log('Creating Group', {groupName, userId, username});
 
     if (userId && username) {
       await AsyncStorage.setItem('groupName', groupName);
-      socket.emit('createGroup', { groupName, userId, username });
+      socket.emit('createGroup', {groupName, userId, username});
     } else {
       Alert.alert('Error', 'happened in createGroup.');
     }
   };
 
-  const joinGroup = async (accessKey) => {
+  const joinGroup = async accessKey => {
     const socket = getSocket();
     const userId = await AsyncStorage.getItem('userId');
     const username = await AsyncStorage.getItem('username');
-    console.log('Joining Group', { accessKey, userId, username });
+    console.log('Joining Group', {accessKey, userId, username});
 
     if (userId && username) {
-    await AsyncStorage.setItem('accessKey', accessKey); 
-      socket.emit('joinGroup', { accessKey, userId, username });
+      await AsyncStorage.setItem('accessKey', accessKey);
+      socket.emit('joinGroup', {accessKey, userId, username});
     } else {
       Alert.alert('Error', 'happened in joinGroup.');
     }
@@ -117,7 +142,7 @@ const HomeScreen = ({ navigation }) => {
 
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Welcome' }],
+        routes: [{name: 'Welcome'}],
       });
     } catch (error) {
       console.error(error);
@@ -131,7 +156,7 @@ const HomeScreen = ({ navigation }) => {
       if (storedAccessKey) {
         setAccessKey(storedAccessKey);
       } else {
-        setAccessKey('');  
+        setAccessKey('');
       }
     };
 
@@ -140,25 +165,25 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
+      <Animated.View
+        style={[styles.buttonContainer, {transform: [{translateY: btnY}]}]}>
         <TouchableOpacity
           style={styles.createBtn}
           onPress={() => {
-            setAccessKey(''); 
+            setAccessKey('');
             setIsCreateModalVisible(true);
           }}
-          color={"rgba(124, 252, 0, .7)"}
-        >
+          color={'rgba(124, 252, 0, .7)'}>
           <Text style={styles.buttonText}>Create Group</Text>
         </TouchableOpacity>
       </Animated.View>
 
-      <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
+      <Animated.View
+        style={[styles.buttonContainer, {transform: [{translateY: btnY}]}]}>
         <TouchableOpacity
           style={styles.joinBtn}
           onPress={() => setIsJoinModalVisible(true)}
-          color={"rgba(124, 252, 0, .7)"}
-        >
+          color={'rgba(124, 252, 0, .7)'}>
           <Text style={styles.buttonText}>Join Group</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -176,8 +201,7 @@ const HomeScreen = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.button, !groupName ? styles.disabledButton : null]}
               onPress={createGroup}
-              disabled={!groupName}
-            >
+              disabled={!groupName}>
               <Text style={styles.buttonText}>Generate Access Key</Text>
             </TouchableOpacity>
           )}
@@ -185,8 +209,7 @@ const HomeScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => setIsCreateModalVisible(false)}
-            color={"rgba(124, 252, 0, .7)"}
-          >
+            color={'rgba(124, 252, 0, .7)'}>
             <Text style={styles.buttonText}>Back</Text>
           </TouchableOpacity>
         </View>
@@ -203,24 +226,20 @@ const HomeScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[styles.button, !accessKey ? styles.disabledButton : null]}
             onPress={() => joinGroup(accessKey)}
-            disabled={!accessKey}
-          >
+            disabled={!accessKey}>
             <Text style={styles.buttonText}>Join Group</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => setIsJoinModalVisible(false)}
-            color={"rgba(124, 252, 0, .7)"}
-          >
+            color={'rgba(124, 252, 0, .7)'}>
             <Text style={styles.buttonText}>Back</Text>
           </TouchableOpacity>
         </View>
       </Modal>
-      <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: btnY }] }]}>
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-        >
+      <Animated.View
+        style={[styles.buttonContainer, {transform: [{translateY: btnY}]}]}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -251,7 +270,7 @@ const styles = StyleSheet.create({
     margin: 11,
     borderRadius: 2,
     shadowColor: 'black',
-    shadowOffset: { width: 3, height: 3 },
+    shadowOffset: {width: 3, height: 3},
     shadowRadius: 3,
     elevation: 8,
     width: 300,
@@ -268,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,
@@ -282,7 +301,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,
@@ -296,7 +315,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,
@@ -310,7 +329,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,
@@ -325,7 +344,7 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif-condensed',
     textAlign: 'center',
     textShadowColor: '#222',
-    textShadowOffset: { width: 0.7, height: 0.7 },
+    textShadowOffset: {width: 0.7, height: 0.7},
     textShadowRadius: 1,
   },
   backBtn: {
@@ -335,7 +354,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,
@@ -349,7 +368,7 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif-condensed',
     textAlign: 'center',
     textShadowColor: '#222',
-    textShadowOffset: { width: 0.7, height: 0.7 },
+    textShadowOffset: {width: 0.7, height: 0.7},
     textShadowRadius: 1,
   },
   disabledButton: {

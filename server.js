@@ -16,11 +16,14 @@ const welcomeRouter = require('./routes/home');
 const userRouter = require('./routes/users');
 const locationRouter = require('./routes/locations');
 const communicationRouter = require('./routes/communication');
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 
 const url = config.MONGO_KEY;
 mongoose.set('strictQuery', false);
-const connect = mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
+const connect = mongoose.connect(url, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 connect.then(
   () => console.log('Connected correctly to server'),
@@ -35,20 +38,20 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 
 app.use(
   session({
     secret: config.SECRET_KEY,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 },
+    cookie: {maxAge: 1000 * 60 * 60 * 24},
   }),
 );
 
 app.use(passport.initialize());
 
-app.use("/", welcomeRouter);
+app.use('/', welcomeRouter);
 app.use('/users', userRouter);
 app.use('/locations', locationRouter);
 app.use('/communication', communicationRouter);
@@ -66,7 +69,7 @@ app.use((err, req, res, next) => {
 
   const title = 'Error';
   res.status(err.status || 500);
-  res.render('error', { title: title });
+  res.render('error', {title: title});
 });
 
 const port = process.env.PORT || 8081;
@@ -76,10 +79,10 @@ const server = app.listen(port, () => {
 
 const io = socketio(server);
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   console.log('a user connected');
 
-  socket.on('createGroup', async ({ groupName, userId, username }) => {
+  socket.on('createGroup', async ({groupName, userId, username}) => {
     try {
       const accessKey = uuidv4().substring(0, 8);
       const group = new Group({
@@ -89,65 +92,85 @@ io.on('connection', (socket) => {
       });
       await group.save();
       socket.join(accessKey);
-      socket.emit('groupCreated', { accessKey, userId, username });
+      socket.emit('groupCreated', {accessKey, userId, username});
     } catch (err) {
       console.error('Error creating group:', err);
-      socket.emit('error', { message: 'Failed to create group', error: err.message });
+      socket.emit('error', {
+        message: 'Failed to create group',
+        error: err.message,
+      });
     }
   });
 
-  socket.on('joinGroup', async ({ accessKey, userId, username }) => {
+  socket.on('joinGroup', async ({accessKey, userId, username}) => {
     try {
-      const group = await Group.findOne({ accessKey });
+      const group = await Group.findOne({accessKey});
       if (group) {
         if (!group.members.includes(userId)) {
           group.members.push(userId);
           await group.save();
         }
         socket.join(accessKey);
-        socket.emit('groupJoined', { accessKey, userId, username, groupName: group.groupName });
-        io.to(accessKey).emit('userJoined', { userId, username });
-        console.log(`User ${userId} joined group ${group.groupName} with access key ${accessKey}`);
+        socket.emit('groupJoined', {
+          accessKey,
+          userId,
+          username,
+          groupName: group.groupName,
+        });
+        io.to(accessKey).emit('userJoined', {userId, username});
+        console.log(
+          `User ${userId} joined group ${group.groupName} with access key ${accessKey}`,
+        );
       } else {
-        socket.emit('error', { message: 'Group not found' });
+        socket.emit('error', {message: 'Group not found'});
       }
     } catch (err) {
       console.error('Error joining group:', err);
-      socket.emit('error', { message: 'An error occurred while processing your request', error: err.message });
+      socket.emit('error', {
+        message: 'An error occurred while processing your request',
+        error: err.message,
+      });
     }
   });
 
-  socket.on('updateLocation', async (data) => {
+  socket.on('updateLocation', async data => {
     try {
-      const { userId, coordinates, accessKey } = data;
+      const {userId, coordinates, accessKey} = data;
       if (!userId || !coordinates || !accessKey) {
-        socket.emit('error', { message: 'Invalid data' });
+        socket.emit('error', {message: 'Invalid data'});
         return;
       }
       const location = new Location({
         userId,
-        coordinates: { type: 'Point', coordinates },
+        coordinates: {type: 'Point', coordinates},
         timestamp: new Date(),
       });
       await location.save();
-      io.to(accessKey).emit('locationUpdated', { userId, coordinates, username: data.username });
+      io.to(accessKey).emit('locationUpdated', {
+        userId,
+        coordinates,
+        username: data.username,
+      });
       console.log(`Location update from user ${userId}: ${coordinates}`);
     } catch (err) {
       console.error('Error updating location:', err);
-      socket.emit('error', { message: 'Failed to update location', error: err.message });
+      socket.emit('error', {
+        message: 'Failed to update location',
+        error: err.message,
+      });
     }
   });
 
-  socket.on('sendMessage', async (data) => {
+  socket.on('sendMessage', async data => {
     try {
-      const { senderId, message, accessKey, timestamp } = data;
+      const {senderId, message, accessKey, timestamp} = data;
       if (!senderId || !message || !accessKey || !timestamp) {
-        socket.emit('error', { message: 'Invalid data' });
+        socket.emit('error', {message: 'Invalid data'});
         return;
       }
       const user = await User.findById(senderId);
       if (!user) {
-        socket.emit('error', { message: 'User not found' });
+        socket.emit('error', {message: 'User not found'});
         return;
       }
       const newMessage = new Communication({
@@ -164,7 +187,10 @@ io.on('connection', (socket) => {
       console.log(`Message from ${user.username}: ${message}`);
     } catch (err) {
       console.error('Error sending message:', err);
-      socket.emit('error', { message: 'Failed to send message', error: err.message });
+      socket.emit('error', {
+        message: 'Failed to send message',
+        error: err.message,
+      });
     }
   });
 

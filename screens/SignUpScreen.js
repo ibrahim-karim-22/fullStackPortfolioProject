@@ -2,18 +2,17 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Alert,
   TouchableOpacity,
-  Animated
+  Animated,
 } from 'react-native';
-import { Card } from 'react-native-elements';
-import { useState, useEffect, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { CLOUD_KEY } from '@env'
+import {Card} from 'react-native-elements';
+import {useState, useEffect, useRef} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {CLOUD_KEY} from '@env';
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -36,7 +35,6 @@ const SignUpScreen = () => {
     ]).start();
   }, [btnY]);
 
-
   const handleSignUp = async () => {
     setLoading(true);
     try {
@@ -45,7 +43,7 @@ const SignUpScreen = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ firstname, lastname, username, email, password }),
+        body: JSON.stringify({firstname, lastname, username, email, password}),
       });
       const data = await response.json();
 
@@ -70,7 +68,7 @@ const SignUpScreen = () => {
   return (
     <View style={styles.mainContainer}>
       <KeyboardAvoidingView behavior="padding">
-        <Animated.View style={[{ transform: [{ translateY: btnY }] }]}>
+        <Animated.View style={[{transform: [{translateY: btnY}]}]}>
           <Card containerStyle={styles.card}>
             <TextInput
               style={styles.input}
@@ -111,8 +109,7 @@ const SignUpScreen = () => {
               <>
                 <TouchableOpacity
                   style={styles.btn}
-                  onPress={() => handleSignUp()}
-                >
+                  onPress={() => handleSignUp()}>
                   <Text style={styles.buttonText}>Sign Up</Text>
                 </TouchableOpacity>
               </>
@@ -135,11 +132,10 @@ const styles = StyleSheet.create({
     margin: 23,
     borderRadius: 2,
     shadowColor: 'black',
-    shadowOffset: { width: 1, height: 1 },
+    shadowOffset: {width: 1, height: 1},
     shadowOpacity: 0.7,
     shadowRadius: 10,
     elevation: 8,
-    // alignSelf: 'center',
     alignItems: 'center',
   },
   title: {
@@ -148,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textAlign: 'center',
     shadowColor: 'black',
-    shadowOffset: { width: 1, height: 1 },
+    shadowOffset: {width: 1, height: 1},
     shadowOpacity: 0.7,
     shadowRadius: 10,
     elevation: 5,
@@ -160,7 +156,7 @@ const styles = StyleSheet.create({
     margin: 5,
     borderRadius: 2,
     shadowColor: 'black',
-    shadowOffset: { width: 3, height: 3 },
+    shadowOffset: {width: 3, height: 3},
     shadowRadius: 3,
     elevation: 8,
   },
@@ -171,7 +167,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,
@@ -185,7 +181,7 @@ const styles = StyleSheet.create({
     fontFamily: 'sans-serif-condensed',
     textAlign: 'center',
     textShadowColor: '#222',
-    textShadowOffset: { width: .7, height: .7 },
+    textShadowOffset: {width: 0.7, height: 0.7},
     textShadowRadius: 1,
     alignContent: 'center',
     alignItems: 'center',

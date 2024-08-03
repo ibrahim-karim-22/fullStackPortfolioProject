@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import {useState, useEffect} from 'react';
+import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MapAndChatScreen from "./MapAndChatScreen";
-import ChatScreen from "./ChatScreen";
+import MapAndChatScreen from './MapAndChatScreen';
+import ChatScreen from './ChatScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Tab = createMaterialBottomTabNavigator();
@@ -29,28 +29,41 @@ const TabScreen = () => {
       initialRouteName="Track"
       activeColor="goldenrod"
       inactiveColor="gray"
-      barStyle={{ backgroundColor: 'royalblue', height: 67 }}
-    >
+      barStyle={{backgroundColor: 'royalblue', height: 67}}>
       <Tab.Screen
         name="Track"
-        children={(props) => (
-          <MapAndChatScreen {...props} localUserId={localUserId} accessKey={accessKey} username={username} />
+        children={props => (
+          <MapAndChatScreen
+            {...props}
+            localUserId={localUserId}
+            accessKey={accessKey}
+            username={username}
+          />
         )}
         options={{
           tabBarLabel: 'Track',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="google-maps" color={color} size={26} />
+          tabBarIcon: ({color}) => (
+            <MaterialCommunityIcons
+              name="google-maps"
+              color={color}
+              size={26}
+            />
           ),
         }}
       />
       <Tab.Screen
         name="Chat"
-        children={(props) => (
-          <ChatScreen {...props} localUserId={localUserId} accessKey={accessKey} username={username} />
+        children={props => (
+          <ChatScreen
+            {...props}
+            localUserId={localUserId}
+            accessKey={accessKey}
+            username={username}
+          />
         )}
         options={{
           tabBarLabel: 'Chat',
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({color}) => (
             <MaterialCommunityIcons name="chat" color={color} size={26} />
           ),
         }}

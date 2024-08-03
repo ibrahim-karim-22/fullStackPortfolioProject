@@ -1,11 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
-import { Text, View, TextInput, FlatList, Keyboard, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import {useState, useEffect, useRef} from 'react';
+import {
+  Text,
+  View,
+  TextInput,
+  FlatList,
+  Keyboard,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import socketIOClient from 'socket.io-client';
-import { CLOUD_KEY } from '@env';
+import {CLOUD_KEY} from '@env';
 
 const serverKey = CLOUD_KEY;
 
-const ChatScreen = ({ localUserId, accessKey, username }) => {
+const ChatScreen = ({localUserId, accessKey, username}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const socketRef = useRef(null);
@@ -18,8 +27,16 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
       socketRef.current.on('connect', () => {
         console.log('Connected to server');
         if (accessKey && localUserId && username) {
-          console.log('Joining Group', { accessKey, userId: localUserId, username });
-          socketRef.current.emit('joinGroup', { accessKey, userId: localUserId, username });
+          console.log('Joining Group', {
+            accessKey,
+            userId: localUserId,
+            username,
+          });
+          socketRef.current.emit('joinGroup', {
+            accessKey,
+            userId: localUserId,
+            username,
+          });
         }
       });
 
@@ -27,9 +44,9 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
         console.log('Disconnected from server');
       });
 
-      socketRef.current.on('newMessage', (msg) => {
+      socketRef.current.on('newMessage', msg => {
         if (msg.senderId !== localUserId) {
-        setMessages((prevMessages) => [...prevMessages, msg]);
+          setMessages(prevMessages => [...prevMessages, msg]);
         }
       });
     }
@@ -40,7 +57,9 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
     const fetchMessages = async () => {
       try {
         if (accessKey) {
-          const response = await fetch(`${CLOUD_KEY}/communication/byAccessKey/${accessKey}`);
+          const response = await fetch(
+            `${CLOUD_KEY}/communication/byAccessKey/${accessKey}`,
+          );
           const data = await response.json();
           setMessages(data);
         }
@@ -52,11 +71,11 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
 
     const socket = getSocket();
 
-    socket.on('groupJoined', ({ groupName }) => {
+    socket.on('groupJoined', ({groupName}) => {
       console.log('Group Joined:', groupName);
     });
 
-    socket.on('error', ({ message }) => {
+    socket.on('error', ({message}) => {
       Alert.alert('Error', message);
     });
 
@@ -77,12 +96,12 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
       const socket = getSocket();
       socket.emit('sendMessage', newMessage);
       setMessage('');
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setMessages(prevMessages => [...prevMessages, newMessage]);
       Keyboard.dismiss();
     }
   };
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = timestamp => {
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
@@ -91,11 +110,13 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
     <View style={styles.container}>
       <FlatList
         data={messages}
-        renderItem={({ item }) => (
-            <View style={styles.messageContainer}>
+        renderItem={({item}) => (
+          <View style={styles.messageContainer}>
             <Text style={styles.senderId}>{item.senderName}</Text>
-              <Text style={styles.message}>{item.message}</Text>
-            <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
+            <Text style={styles.message}>{item.message}</Text>
+            <Text style={styles.timestamp}>
+              {formatTimestamp(item.timestamp)}
+            </Text>
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
@@ -107,7 +128,7 @@ const ChatScreen = ({ localUserId, accessKey, username }) => {
         placeholder="Type your message..."
       />
       <TouchableOpacity style={styles.btn} onPress={handleSendMessage}>
-      <Text style={styles.buttonText}>Send</Text>
+        <Text style={styles.buttonText}>Send</Text>
       </TouchableOpacity>
     </View>
   );
@@ -128,7 +149,7 @@ const styles = StyleSheet.create({
   senderId: {
     fontWeight: 'bold',
     color: 'snow',
-    fontFamily: 'monospace', 
+    fontFamily: 'monospace',
   },
   message: {
     fontSize: 16,
@@ -144,7 +165,7 @@ const styles = StyleSheet.create({
     margin: 11,
     borderRadius: 2,
     shadowColor: 'black',
-    shadowOffset: { width: 3, height: 3 },
+    shadowOffset: {width: 3, height: 3},
     shadowRadius: 3,
     elevation: 8,
     width: 300,
@@ -157,7 +178,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 4,
     elevation: 9,

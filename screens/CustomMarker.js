@@ -1,8 +1,8 @@
-import { memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Marker } from 'react-native-maps';
+import {memo} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
+import {Marker} from 'react-native-maps';
 
-const CustomMarker = ({ coordinate, username }) => {
+const CustomMarker = ({coordinate, username}) => {
   return (
     <Marker coordinate={coordinate}>
       <View style={styles.markerContainer}>
